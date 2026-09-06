@@ -1,0 +1,68 @@
+# ---------- Secrets ----------
+.env
+.env.local
+*.jks
+*.keystore
+key.properties
+*.p12
+*.pem
+
+# ---------- Java / Maven ----------
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.log
+hs_err_pid*
+replay_pid*
+
+# ---------- Flutter / Dart ----------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+**/doc/api/
+coverage/
+.metadata
+
+# ---------- Android ----------
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/captures/
+mobile/android/app/release/
+mobile/android/key.properties
+mobile/android/**/GeneratedPluginRegistrant.java
+mobile/android/.cxx/
+
+# ---------- iOS / macOS ----------
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/flutter_export_environment.sh
+mobile/ios/Flutter/ephemeral/
+
+# ---------- IDEs ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.settings/
+.project
+.classpath
+.factorypath
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Local tooling ----------
+.localdb/
+*.tmp
