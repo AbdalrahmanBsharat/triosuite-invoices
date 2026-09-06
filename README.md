@@ -234,19 +234,19 @@ cancelled.
 ## Tests
 
 ```bash
-cd backend && ./mvnw verify        # 48 unit + 79 integration
+cd backend && ./mvnw verify        # 48 unit + 81 integration
 cd mobile  && flutter test         # 52
 cd mobile  && flutter analyze      # clean, no ignore comments
 ```
 
-**179 tests**, all passing.
+**181 tests**, all passing.
 
 | Suite | Count | What it proves |
 |---|---|---|
 | `InvoiceCalculatorTest` (Java) | 30 | Both tax modes, 2- and 3-decimal currencies, exact-half rounding, zero tax, fractional quantities, per-line rounding drift, `net + tax = gross`, base conversion. No Spring context. |
 | `invoice_calculator_test.dart` | 30 | **The same expected figures**, against the Dart implementation — so changing one side without the other fails a build. |
 | `InvoiceLifecycleIT` | 22 | Create, numbering and its per-year reset, update, approve, `INVOICE_NOT_EDITABLE`, `INVALID_TRANSITION`, `STALE_VERSION`, cancel, and that no delete endpoint exists. |
-| `ApiSecurityIT` | 21 | Anonymous `401` on every protected route, tampered tokens, the SALES/ADMIN split, the actuator surface, security headers, and that no error leaks an internal name. |
+| `ApiSecurityIT` | 23 | Anonymous `401` on every protected route, tampered tokens, the SALES/ADMIN split, the actuator surface, security headers, and that no error leaks an internal name. |
 | `api_contract_test.dart` | 15 | The app's real models and repositories against a **running API** — every field, enum, date and decimal, plus the full lifecycle from the app's side. |
 | `CatalogIT` | 12 | Barcode found and not found, search across name/SKU/barcode, inactive customers excluded, pagination and its cap. |
 | `AuthIT` | 10 | Login, wrong password, unknown username, refresh rotation, single-use refresh tokens, idempotent logout. |
@@ -398,7 +398,7 @@ Stated plainly, because a reviewer will find them anyway.
 │   ├── src/main/resources/
 │   │   ├── application.yml   local · test · prod, fully env-driven
 │   │   └── db/migration/     V1__schema.sql · V2__seed.sql  ← the source of truth
-│   ├── src/test/java/…       48 unit + 79 integration tests
+│   ├── src/test/java/…       48 unit + 81 integration tests
 │   ├── scripts/smoke.sh      the reviewer journey against any base URL
 │   └── Dockerfile            multi-stage, JRE-only, non-root
 ├── mobile/                   Flutter app

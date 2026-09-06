@@ -3,7 +3,7 @@
 Checklist for the build described in [`AGENT_BRIEF.md`](../AGENT_BRIEF.md), and the final
 requirement-by-requirement audit.
 
-**Status: complete.** 179 tests passing, the smoke test green end to end, a signed release APK
+**Status: complete.** 181 tests passing, the smoke test green end to end, a signed release APK
 built. Two things could not be executed on this machine and are called out honestly below.
 
 ---
@@ -94,7 +94,7 @@ untouched. See [`database/README.md`](../database/README.md).
 - [x] Login rate limiter — 5/min per username **and** per IP → `429` + `Retry-After`
 - [x] Request-ID MDC filter
 - [x] OpenAPI annotations + Swagger UI
-- [x] 79 integration tests against real MySQL, covering every case the brief lists
+- [x] 81 integration tests against real MySQL, covering every case the brief lists
 - [x] Concurrency test: 12 parallel creates get distinct, gapless numbers
 - [x] `backend/scripts/smoke.sh`
 - [x] **Exit:** `./mvnw verify` green · `docs/openapi.json` exported · `docs/API.md` written
@@ -199,9 +199,9 @@ check is an overlay on the login route, not a sixth screen.
 ## Test inventory
 
 ```
-backend  ./mvnw verify     48 unit + 79 integration = 127
+backend  ./mvnw verify     48 unit + 81 integration = 129
 mobile   flutter test       30 calculator + 15 contract + 7 widget = 52
-                                                          total 179
+                                                          total 181
 ```
 
 | Suite | Tests |
@@ -209,7 +209,7 @@ mobile   flutter test       30 calculator + 15 contract + 7 widget = 52
 | `InvoiceCalculatorTest` (Java, no Spring) | 30 |
 | `invoice_calculator_test.dart` (same expected figures) | 30 |
 | `InvoiceLifecycleIT` | 22 |
-| `ApiSecurityIT` | 21 |
+| `ApiSecurityIT` | 23 |
 | `api_contract_test.dart` (against a live API) | 15 |
 | `CatalogIT` | 12 |
 | `AuthIT` | 10 |

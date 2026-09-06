@@ -46,16 +46,49 @@ class ApiSecurityIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("a forged or tampered token is refused")
-    void tamperedTokenIsRefused() throws Exception {
-        String token = adminToken();
-        // Flip the last character of the signature.
-        char last = token.charAt(token.length() - 1);
-        String tampered = token.substring(0, token.length() - 1) + (last == 'A' ? 'B' : 'A');
+    @DisplayName("a token whose payload was edited is refused")
+    void tamperedPayloadIsRefused() throws Exception {
+        String[] parts = bearerTokenOf(adminToken()).split("\\.");
+
+        // Alter the payload rather than the signature. Editing the signature is not reliably
+        // detectable by a test: an HS256 signature is 32 bytes, which base64url-encodes to 43
+        // characters, so the last character carries only four significant bits — changing it can
+        // decode to the identical signature. Changing the payload always changes what was signed.
+        char[] payload = parts[1].toCharArray();
+        payload[0] = (payload[0] == 'e') ? 'f' : 'e';
+        String tampered = "Bearer %s.%s.%s".formatted(parts[0], new String(payload), parts[2]);
 
         mockMvc.perform(get("/api/invoices").header(HttpHeaders.AUTHORIZATION, tampered))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    @DisplayName("a token signed with the wrong key is refused")
+    void forgedSignatureIsRefused() throws Exception {
+        String[] parts = bearerTokenOf(adminToken()).split("\\.");
+
+        // Same header and payload, a signature of the right shape that nobody legitimate produced.
+        String forged = "Bearer %s.%s.%s".formatted(
+                parts[0], parts[1], "A".repeat(parts[2].length()));
+
+        mockMvc.perform(get("/api/invoices").header(HttpHeaders.AUTHORIZATION, forged))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    @DisplayName("a token that is not a JWT at all is refused")
+    void malformedTokenIsRefused() throws Exception {
+        mockMvc.perform(get("/api/invoices")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer not.a.jwt"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    /** Strips the {@code Bearer } prefix that {@link #adminToken()} adds. */
+    private static String bearerTokenOf(String authorizationHeader) {
+        return authorizationHeader.substring("Bearer ".length());
     }
 
     @Test
