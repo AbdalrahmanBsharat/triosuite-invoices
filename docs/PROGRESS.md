@@ -43,7 +43,7 @@ Fixing it needs a BIOS/UEFI change, an elevated `wsl.exe --install --no-distribu
 
 | Blocked | Consequence | What was done instead |
 |---|---|---|
-| Docker engine | `docker compose up` was never executed here | `Dockerfile` and `docker-compose.yml` are written and committed; **CI builds the image, brings the stack up and runs the smoke test against it**. Integration tests use a real local MySQL, which is the fallback the brief specifies (never H2). |
+| Docker engine | `docker compose up` was never executed here | `Dockerfile` and `docker-compose.yml` are written and committed, and **CI has since built the image, brought the compose stack up healthy and run the smoke test against it — green**. Integration tests use a real local MySQL, which is the fallback the brief specifies (never H2). |
 | Android emulator | The app was never seen rendered | `flutter analyze` clean, 52 tests pass, `flutter build apk --release` produces a **signed** APK, and **15 contract tests drive the app's real repositories and freezed models against a running backend** — covering the serialization, enums, decimals, dates and full invoice lifecycle an emulator run would have exercised. |
 
 A dedicated MySQL 8.4.9 instance was provisioned on **port 3307** from the already-installed server
@@ -128,7 +128,10 @@ untouched. See [`database/README.md`](../database/README.md).
 - [x] Requirement-by-requirement audit of §1, below
 - [x] Item-by-item audit of §6, below
 - [x] `git status` clean
-- [ ] GitHub repository created and pushed — see the final report
+- [x] **CI green on all four jobs** — including the Docker job, which builds the image, brings the
+      compose stack up and runs the smoke test against it: the verification that could not be done
+      on this machine
+- [x] GitHub repository created and pushed: https://github.com/AbdalrahmanBsharat/triosuite-invoices (private — one command in the final report makes it public)
 
 ---
 
@@ -166,7 +169,7 @@ check is an overlay on the login route, not a sixth screen.
 
 | Required | Delivered |
 |---|---|
-| GitHub repository | To be created and pushed — commands in the final report |
+| GitHub repository | [AbdalrahmanBsharat/triosuite-invoices](https://github.com/AbdalrahmanBsharat/triosuite-invoices) — **private**; make it public before submitting |
 | README explaining how to run it | [`README.md`](../README.md) |
 | SQL scripts used to create the database | **[`database/schema.sql`](../database/schema.sql)**, **[`database/seed.sql`](../database/seed.sql)** |
 | Screenshots of the database tables | [`database/screenshots/`](../database/screenshots) — filenames fixed and listed; capture is a manual step |
@@ -227,7 +230,7 @@ mobile   flutter test       30 calculator + 15 contract + 7 widget = 52
 
 Everything that cannot be done from this session, in order, is listed in the final report:
 
-1. Create the GitHub repository and push
+1. Make the repository public (it was created private)
 2. Capture the 13 database screenshots
 3. Deploy (Option A in [`docs/DEPLOYMENT.md`](DEPLOYMENT.md))
 4. Rebuild the APK with the public URL and commit it
