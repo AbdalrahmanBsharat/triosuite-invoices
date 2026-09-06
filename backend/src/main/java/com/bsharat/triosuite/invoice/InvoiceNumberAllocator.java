@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>{@link Propagation#MANDATORY} enforces the part that matters: this must never run in a
  * transaction of its own, or the lock would be released before the invoice row was written and the
- * number could be handed out twice.
+ * same number could be handed out twice.
  */
 @Slf4j
 @Service
@@ -37,13 +37,19 @@ public class InvoiceNumberAllocator {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public String allocate(String prefix, int year) {
-        InvoiceSequence sequence = sequences.findForUpdate(prefix, year).orElseGet(() -> {
-            // First invoice of a new year. Create the row in its own transaction so that losing a
-            // race to another request costs only a rolled-back insert, then take the lock normally.
+        // Check for existence without taking a lock, on purpose. Asking for the lock on a row that
+        // does not exist would make InnoDB take a gap lock, and the insert that has to follow —
+        // necessarily in another transaction, so a duplicate does not doom this one — would then
+        // block against a lock this very transaction holds, until the lock wait times out.
+        if (sequences.countFor(prefix, year) == 0) {
             initializer.createIfAbsent(prefix, year);
-            return sequences.findForUpdate(prefix, year).orElseThrow(() -> new IllegalStateException(
-                    "Invoice sequence " + prefix + "/" + year + " could not be created"));
-        });
+        }
+
+        // A locking read always sees the latest committed row rather than this transaction's
+        // snapshot, so the row just created in another transaction is visible here.
+        InvoiceSequence sequence = sequences.findForUpdate(prefix, year)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Invoice sequence " + prefix + "/" + year + " could not be created"));
 
         long allocated = sequence.getNextValue();
         sequence.setNextValue(allocated + 1);
@@ -52,10 +58,11 @@ public class InvoiceNumberAllocator {
     }
 
     /**
-     * Creates a missing sequence row in a separate transaction.
+     * Creates a missing sequence row in a transaction of its own.
      *
-     * <p>Separate so a duplicate-key clash with a concurrent request rolls back only this insert.
-     * Rolling it back inside the caller's transaction would doom the whole invoice creation.
+     * <p>Separate so that losing the race to a concurrent request costs only this rolled-back
+     * insert. Rolling a duplicate-key violation back inside the caller's transaction would doom the
+     * whole invoice creation.
      */
     @Slf4j
     @Service

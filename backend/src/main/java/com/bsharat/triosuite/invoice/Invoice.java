@@ -122,14 +122,32 @@ public class Invoice extends AuditedEntity {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InvoiceLine> lines = new ArrayList<>();
 
-    /** Replaces every line, keeping both sides of the association consistent. */
-    public void replaceLines(List<InvoiceLine> newLines) {
-        lines.clear();
-        int lineNo = 1;
-        for (InvoiceLine line : newLines) {
-            line.setInvoice(this);
-            line.setLineNo(lineNo++);
-            lines.add(line);
+    /**
+     * Replaces every line, keeping both sides of the association consistent.
+     *
+     * <p>Existing rows are rewritten in place, position by position, rather than cleared and
+     * re-added. That is not an optimisation: {@code uk_invoice_lines_invoice_line_no} makes
+     * {@code (invoice_id, line_no)} unique, and Hibernate orders inserts before deletes within a
+     * flush, so clearing and re-adding would try to insert the new line 1 while the old line 1 was
+     * still present. Surplus rows are trimmed from the tail, whose line numbers are always the
+     * highest, so nothing collides there either.
+     */
+    public void replaceLines(List<InvoiceLine> desired) {
+        for (int index = 0; index < desired.size(); index++) {
+            InvoiceLine target;
+            if (index < lines.size()) {
+                target = lines.get(index);
+            } else {
+                target = new InvoiceLine();
+                target.setInvoice(this);
+                lines.add(target);
+            }
+            target.copyValuesFrom(desired.get(index));
+            target.setLineNo(index + 1);
+        }
+
+        if (lines.size() > desired.size()) {
+            lines.subList(desired.size(), lines.size()).clear();
         }
     }
 }

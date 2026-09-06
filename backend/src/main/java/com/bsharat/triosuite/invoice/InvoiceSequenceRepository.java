@@ -20,4 +20,16 @@ public interface InvoiceSequenceRepository extends JpaRepository<InvoiceSequence
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM InvoiceSequence s WHERE s.id.prefix = :prefix AND s.id.year = :year")
     Optional<InvoiceSequence> findForUpdate(@Param("prefix") String prefix, @Param("year") int year);
+
+    /**
+     * Whether a counter exists for this prefix and year.
+     *
+     * <p>Deliberately a scalar count rather than a {@code findById}. Loading the entity here would
+     * put it in the persistence context, and the {@code FOR UPDATE} read that follows would then
+     * return that already-loaded instance with its stale {@code next_value} instead of the row the
+     * lock just protected — which is precisely how two concurrent creates end up with the same
+     * invoice number.
+     */
+    @Query("SELECT COUNT(s) FROM InvoiceSequence s WHERE s.id.prefix = :prefix AND s.id.year = :year")
+    long countFor(@Param("prefix") String prefix, @Param("year") int year);
 }

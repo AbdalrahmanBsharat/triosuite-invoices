@@ -70,4 +70,22 @@ public class InvoiceLine {
 
     @Column(name = "gross_amount", nullable = false, precision = 19, scale = 4)
     private BigDecimal grossAmount;
+
+    /**
+     * Copies every value except the identity and the parent link.
+     *
+     * <p>Used by {@link Invoice#replaceLines(java.util.List)} to rewrite a line in place. The line
+     * number is deliberately not copied: it is assigned by position there.
+     */
+    void copyValuesFrom(InvoiceLine source) {
+        this.item = source.item;
+        this.itemNameSnapshot = source.itemNameSnapshot;
+        this.barcodeSnapshot = source.barcodeSnapshot;
+        this.quantity = source.quantity;
+        this.unitPrice = source.unitPrice;
+        this.taxRate = source.taxRate;
+        this.netAmount = source.netAmount;
+        this.taxAmount = source.taxAmount;
+        this.grossAmount = source.grossAmount;
+    }
 }
