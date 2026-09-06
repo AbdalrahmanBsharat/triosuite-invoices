@@ -1,0 +1,58 @@
+name: triosuite_invoices
+description: "Triosuite Invoices — create and manage ERP sales invoices."
+publish_to: 'none'
+
+# Shown on the Settings screen via package_info_plus, and used as the Android
+# versionName / versionCode.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management, dependency injection and named routing.
+  get: ^4.7.3
+
+  # HTTP, with interceptors for the bearer token and the single-flight refresh.
+  dio: ^5.11.1
+  pretty_dio_logger: ^1.4.0
+
+  # Tokens live in the Android Keystore, never in shared preferences.
+  #
+  # Held at 10.x deliberately: 11.0.0 hard-codes `compileSdk = 37` in its Gradle file, and no
+  # `platforms;android-37` package exists — the SDK manager only publishes `android-37.0` — so any
+  # project depending on it fails to build. See docs/DECISIONS.md, ADR-0012.
+  flutter_secure_storage: ^10.3.1
+
+  # Barcode scanning.
+  mobile_scanner: ^7.4.0
+
+  # Arbitrary-precision decimal arithmetic. Money never touches a double, on either
+  # side of the wire; this mirrors the server's BigDecimal exactly.
+  decimal: ^3.2.6
+
+  # Date, number and currency formatting in the device's locale.
+  intl: ^0.20.3
+
+  # Immutable models with generated equality, copyWith and JSON codecs.
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+
+  # App version on the Settings screen.
+  package_info_plus: ^10.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  build_runner: ^2.15.1
+  freezed: ^3.2.5
+  json_serializable: ^6.14.1
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release builds: HTTPS only.
+
+  There is no cleartext exception here at all. The app talks to one API over TLS, and a release
+  build that quietly allowed plain HTTP would let a bearer token travel in the clear on any network
+  the phone happens to join.
+
+  The debug variant overrides this file (see src/debug/res/xml/) to allow cleartext to the two
+  addresses a developer machine uses, so `flutter run` against a local backend still works.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

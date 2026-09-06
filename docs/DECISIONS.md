@@ -44,8 +44,10 @@ against the MySQL **service container** in GitHub Actions CI.
 **Consequences.**
 - No H2. The DDL keeps its MySQL-specific features (`CHECK` constraints, `DATETIME(6)`, InnoDB,
   `utf8mb4`, `SELECT … FOR UPDATE`).
-- Running the suite requires a reachable MySQL. `backend/src/test/resources/application-test.yml`
-  documents the defaults; CI provides its own via env vars.
+- Running the suite requires a reachable MySQL. The `test` profile document in
+  `backend/src/main/resources/application.yml` holds the defaults, and every one of them is
+  overridable by an environment variable, which is how CI points the same suite at its service
+  container.
 - Flyway migrates the test schema before each run, and the schema is dropped and recreated so runs are
   reproducible.
 - `Dockerfile` and `docker-compose.yml` are still delivered and are exercised by CI, but they could not
@@ -181,3 +183,70 @@ confirmations are `showModalBottomSheet` / `showDialog` calls inside those pages
 connectivity check is an overlay on the first route, not a route of its own.
 
 **Consequences.** Route count is trivially verifiable in `lib/core/routing/app_pages.dart`.
+
+---
+
+## ADR-0011 — Catalogue prices are converted into the invoice's currency when an item is added
+
+**Context.** The catalogue prices every item in one currency (ILS in the seed), but an invoice may
+be issued in any of five. Dropping the raw catalogue figure onto a USD invoice would produce a
+document that is silently wrong by a factor of the exchange rate — and it would be wrong in the
+direction that overcharges the customer.
+
+**Decision.** When an item is added — by picker or by scanner — the app converts its catalogue price
+into the invoice's currency, via the base currency, at the invoice's own exchange rate:
+
+```
+priceInInvoiceCurrency = round(catalogue price × rate(item currency) ÷ invoice exchange rate)
+```
+
+rounded to the invoice currency's minor units. Changing the invoice's currency, or its rate,
+re-prices every existing line the same way. The unit price stays fully editable afterwards, because
+a negotiated price is a fact about the deal rather than about the catalogue.
+
+**Consequences.** The line's `unitPrice` is what the app sends and what the server stores and
+snapshots; the conversion is a convenience at data-entry time, not a rule the server enforces. The
+seeded foreign-currency invoices were priced by exactly this formula, so the demo data and the app
+agree. Going via the base currency rather than dividing directly means the calculation is still
+correct if an item is ever priced in something other than the base currency.
+
+---
+
+## ADR-0012 — `flutter_secure_storage` is held at 10.x
+
+**Context.** `flutter_secure_storage` 11.0.0 is the current release, and it is what the dependency
+resolver picks. Its Android module hard-codes `compileSdk = 37`, and the Android SDK manager
+publishes no `platforms;android-37` package — only `platforms;android-37.0`, a minor-versioned
+release. Gradle resolves the plugin's request to the literal string `android-37`, finds nothing, and
+the build dies with `Failed to find target with hash string 'android-37'`. No configuration in this
+repository can fix it: the constraint lives inside the dependency.
+
+**Decision.** Pin to `^10.3.1`, which compiles against SDK 36 and needs `minSdk 23` — the same
+floor `mobile_scanner` 7 requires, so nothing else moves.
+
+**Consequences.** The API this project uses is unchanged: `AndroidOptions(storageNamespace: …)`
+exists in both lines, and 10.x already stores through the Android Keystore with an AES-GCM data key
+wrapped by RSA, which is exactly what 11 does. `flutter pub outdated` will keep reporting 11.0.0 as
+available; the comment in `pubspec.yaml` says why it is not taken. The pin can be lifted as soon as
+either the plugin declares `compileSdkMinor` or an `android-37` platform package is published.
+
+---
+
+## ADR-0013 — Amounts cross the wire as JSON numbers and are parsed through their decimal text
+
+**Context.** Money must not pass through a binary float, and `dart:convert` has no arbitrary-
+precision number type: by the time a response is decoded, `10443.2500` is already a Dart `double`.
+
+**Decision.** The API keeps sending amounts as JSON numbers, and `DecimalConverter` builds a
+`Decimal` from the number's **shortest round-tripping decimal representation** rather than from its
+binary value. Dart guarantees `double.toString()` produces a string that parses back to the same
+double, which for a value of at most 15 significant digits is exactly the decimal the server sent.
+Every amount here is `DECIMAL(19,4)` at invoice magnitudes, so that holds with several orders of
+magnitude to spare. In the other direction the app sends decimals as **strings**, so nothing the
+user typed is ever routed through a float on its way to the server.
+
+**Consequences.** No precision is lost in practice, and the API stays readable and arithmetic-
+friendly for anyone poking at it with `curl` and `jq` — the smoke script adds line amounts in `jq`
+to check that net + tax equals gross, which strings would make impossible. The stricter alternative,
+serialising `BigDecimal` as a JSON string, is the right move if amounts ever exceed 15 significant
+digits; it is noted here so the reason for not doing it now is on the record rather than assumed.
