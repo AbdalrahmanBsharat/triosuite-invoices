@@ -1,0 +1,198 @@
+# =====================================================================================
+# Triosuite Invoices API — base configuration.
+#
+# Every value that differs between environments is read from an environment variable.
+# See .env.example for the full list. Profiles:
+#   local (default) — developer machine, permissive defaults so `./mvnw spring-boot:run` works
+#   test            — integration tests, points at a real MySQL 8 (never H2)
+#   prod            — deployed; fails fast when a required secret is missing
+# =====================================================================================
+
+spring:
+  application:
+    name: triosuite-invoices-api
+  profiles:
+    default: local
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: 30000
+      pool-name: triosuite-pool
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 30
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  jackson:
+    default-property-inclusion: non_null
+    # Jackson 3 renders java.time types as ISO-8601 by default; timestamps are Instants, so
+    # they serialise as UTC with a trailing Z, which is exactly the contract the app expects.
+    datetime:
+      write-dates-as-timestamps: false
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+        one-indexed-parameters: false
+
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+  info:
+    env:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+info:
+  app:
+    name: Triosuite Invoices API
+    version: '@project.version@'
+
+app:
+  jwt:
+    # HS256 signing key. Must be at least 32 bytes (256 bits).
+    secret: ${JWT_SECRET}
+    issuer: ${JWT_ISSUER:triosuite-invoices-api}
+    access-token-ttl: ${JWT_ACCESS_TTL:PT30M}
+    refresh-token-ttl: ${JWT_REFRESH_TTL:P30D}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  login-rate-limit:
+    max-attempts: ${LOGIN_MAX_ATTEMPTS:5}
+    window: ${LOGIN_RATE_WINDOW:PT1M}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [${spring.application.name:}] [%X{requestId:-________}] [%t] %-40.40logger{39} : %m%n"
+  level:
+    root: INFO
+    com.bsharat.triosuite: ${LOG_LEVEL_APP:INFO}
+
+---
+# -------------------------------------------------------------------------------------
+# local — developer machine.
+# Defaults target the dedicated MySQL 8.4 instance documented in database/README.md.
+# -------------------------------------------------------------------------------------
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3307/triosuite?sslMode=DISABLED&allowPublicKeyRetrieval=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${DB_USERNAME:triosuite}
+    password: ${DB_PASSWORD:triosuite_dev_pw}
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  jwt:
+    # Development-only key. Production supplies JWT_SECRET and has no default (see prod profile).
+    secret: ${JWT_SECRET:local-development-only-signing-key-change-me-32bytes+}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+
+logging:
+  level:
+    com.bsharat.triosuite: ${LOG_LEVEL_APP:DEBUG}
+
+---
+# -------------------------------------------------------------------------------------
+# test — integration tests. Real MySQL 8 (ADR-0002), schema recreated per run by Flyway.
+# -------------------------------------------------------------------------------------
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3307/triosuite_test?sslMode=DISABLED&allowPublicKeyRetrieval=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${DB_USERNAME:triosuite}
+    password: ${DB_PASSWORD:triosuite_dev_pw}
+  flyway:
+    clean-disabled: false
+    clean-on-validation-error: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:integration-test-signing-key-not-a-real-secret-32b}
+  login-rate-limit:
+    max-attempts: ${LOGIN_MAX_ATTEMPTS:5}
+    window: ${LOGIN_RATE_WINDOW:PT1M}
+
+logging:
+  level:
+    root: WARN
+    com.bsharat.triosuite: INFO
+
+---
+# -------------------------------------------------------------------------------------
+# prod — deployed. No defaults for secrets: startup fails fast when one is missing.
+# -------------------------------------------------------------------------------------
+spring:
+  config:
+    activate:
+      on-profile: prod
+  main:
+    lazy-initialization: true
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  level:
+    root: INFO
+    com.bsharat.triosuite: ${LOG_LEVEL_APP:INFO}
+    org.hibernate.SQL: WARN

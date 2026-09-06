@@ -1,0 +1,23 @@
+# Normalise line endings: LF in the repository, native in the working tree.
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF or cmd.exe mis-parses them.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# The Maven wrapper is executed by /bin/sh on Linux images; it must stay LF.
+mvnw   text eol=lf
+gradlew text eol=lf
+
+# Binary assets git must never try to convert or diff as text.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.apk  binary
+*.jar  binary
+*.keystore binary
+*.jks  binary
+*.ttf  binary
+*.otf  binary
