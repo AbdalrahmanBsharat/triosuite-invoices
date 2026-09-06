@@ -1,0 +1,189 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------------------
+  # The two SQL scripts the assessment asks for are copies of the Flyway migrations the
+  # application actually runs. This job exists so they cannot quietly drift apart.
+  # ---------------------------------------------------------------------------------------
+  sql-mirror:
+    name: SQL scripts match the migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/check-sql-mirror.sh
+
+  # ---------------------------------------------------------------------------------------
+  # Backend: unit tests, then integration tests against a real MySQL 8.
+  #
+  # A service container, not Testcontainers and certainly not H2 — the schema uses CHECK
+  # constraints, DATETIME(6) and SELECT ... FOR UPDATE, so anything else would be testing
+  # something other than what ships.
+  # ---------------------------------------------------------------------------------------
+  backend:
+    name: Backend — ./mvnw verify
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root-password
+          MYSQL_DATABASE: triosuite_test
+          MYSQL_USER: triosuite
+          MYSQL_PASSWORD: ci-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -pci-root-password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    env:
+      # The same variables the test profile reads locally, so the suite runs unchanged.
+      DB_URL: jdbc:mysql://127.0.0.1:3306/triosuite_test?sslMode=DISABLED&allowPublicKeyRetrieval=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+      DB_USERNAME: triosuite
+      DB_PASSWORD: ci-password
+      JWT_SECRET: continuous-integration-signing-key-not-a-real-secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Grant the schema owner rights to clean between tests
+        run: |
+          # Flyway drops and recreates the schema before every test method, which needs more than
+          # the container grants its application user by default.
+          mysql -h 127.0.0.1 -u root -pci-root-password \
+            -e "GRANT ALL PRIVILEGES ON *.* TO 'triosuite'@'%'; FLUSH PRIVILEGES;"
+
+      - name: Verify
+        working-directory: backend
+        run: ./mvnw -B -ntp verify
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------------------
+  # The Dockerfile and compose stack could not be run on the development machine, so CI is
+  # where they are actually exercised.
+  # ---------------------------------------------------------------------------------------
+  docker:
+    name: Docker image builds and the API comes up healthy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the runtime image
+        run: docker build -t triosuite-invoices-api:ci ./backend
+
+      - name: Bring up the compose stack
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root-password
+          DB_PASSWORD: ci-password
+          JWT_SECRET: continuous-integration-signing-key-not-a-real-secret
+        run: |
+          cat > .env <<EOF
+          MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+          DB_PASSWORD=$DB_PASSWORD
+          JWT_SECRET=$JWT_SECRET
+          EOF
+          docker compose up --build --detach --wait --wait-timeout 300
+
+      - name: Walk the reviewer journey against it
+        run: |
+          sudo apt-get update && sudo apt-get install --yes --no-install-recommends jq
+          ./backend/scripts/smoke.sh http://localhost:8080
+
+      - name: Container logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
+
+      - name: Tear down
+        if: always()
+        run: docker compose down --volumes
+
+  # ---------------------------------------------------------------------------------------
+  # Mobile: analyzer, tests, and a signed-if-possible release APK as a downloadable artifact.
+  # ---------------------------------------------------------------------------------------
+  mobile:
+    name: Mobile — analyze, test, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17 for Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Check the generated code is current
+        working-directory: mobile
+        run: |
+          # freezed and json_serializable output is committed, as the brief requires. Regenerating
+          # it here catches a model edited without a rerun, which would otherwise only show up as a
+          # runtime parse failure on someone's phone.
+          dart run build_runner build
+          git diff --exit-code -- lib || {
+            echo "::error::Generated code is stale. Run: cd mobile && dart run build_runner build"
+            exit 1
+          }
+
+      - name: Analyze
+        working-directory: mobile
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Test
+        working-directory: mobile
+        # The contract tests skip themselves without a backend; the rest run here.
+        run: flutter test --reporter expanded
+
+      - name: Build the release APK
+        working-directory: mobile
+        # Unsigned by the release key — key.properties is not in the repository — so this falls
+        # back to the debug key. It proves the build is green; the signed APK in release/ is built
+        # locally against the real keystore.
+        run: flutter build apk --release
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: triosuite-invoices-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
