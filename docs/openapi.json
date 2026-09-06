@@ -1,0 +1,1383 @@
+{
+  "components": {
+    "schemas": {
+      "ApproveInvoiceRequest": {
+        "properties": {
+          "version": {
+            "example": 0,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "type": "object"
+      },
+      "CancelInvoiceRequest": {
+        "properties": {
+          "reason": {
+            "example": "Customer postponed the rollout.",
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "example": 1,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "type": "object"
+      },
+      "CreateInvoiceRequest": {
+        "properties": {
+          "currencyCode": {
+            "example": "USD",
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "customerId": {
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "exchangeRate": {
+            "example": 3.65,
+            "minimum": 0,
+            "type": "number"
+          },
+          "issueDate": {
+            "example": "2026-09-06",
+            "format": "date",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceLineRequest"
+            },
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array"
+          },
+          "notes": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "taxMode": {
+            "enum": [
+              "EXCLUSIVE",
+              "INCLUSIVE"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "currencyCode",
+          "customerId",
+          "exchangeRate",
+          "issueDate",
+          "lines",
+          "taxMode"
+        ],
+        "type": "object"
+      },
+      "Currency": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "code": {
+            "example": "USD",
+            "type": "string"
+          },
+          "minorUnits": {
+            "example": 2,
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "example": "US Dollar",
+            "type": "string"
+          },
+          "symbol": {
+            "example": "$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExchangeRate": {
+        "properties": {
+          "currencyCode": {
+            "example": "USD",
+            "type": "string"
+          },
+          "rateToBase": {
+            "example": 3.65,
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Invoice": {
+        "properties": {
+          "approvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "approvedBy": {
+            "type": "string"
+          },
+          "baseCurrencyCode": {
+            "example": "ILS",
+            "type": "string"
+          },
+          "cancellationReason": {
+            "type": "string"
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "cancelledBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "example": "USD",
+            "type": "string"
+          },
+          "currencyMinorUnits": {
+            "example": 2,
+            "format": "int32",
+            "type": "integer"
+          },
+          "currencySymbol": {
+            "example": "$",
+            "type": "string"
+          },
+          "customerId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "example": 3.65,
+            "type": "number"
+          },
+          "grandTotal": {
+            "type": "number"
+          },
+          "grandTotalBase": {
+            "type": "number"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "invoiceNumber": {
+            "example": "INV-2026-000001",
+            "type": "string"
+          },
+          "issueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceLine"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "APPROVED",
+              "CANCELLED"
+            ],
+            "type": "string"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "taxMode": {
+            "enum": [
+              "EXCLUSIVE",
+              "INCLUSIVE"
+            ],
+            "type": "string"
+          },
+          "taxTotal": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InvoiceLine": {
+        "properties": {
+          "barcode": {
+            "type": "string"
+          },
+          "grossAmount": {
+            "type": "number"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "lineNo": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "netAmount": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "taxRate": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InvoiceLineRequest": {
+        "properties": {
+          "itemId": {
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "quantity": {
+            "example": 2.0,
+            "minimum": 0,
+            "type": "number"
+          },
+          "unitPrice": {
+            "example": 4299.0,
+            "minimum": 0.0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "quantity",
+          "unitPrice"
+        ],
+        "type": "object"
+      },
+      "Item": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "barcode": {
+            "example": "7290001000014",
+            "type": "string"
+          },
+          "currencyCode": {
+            "example": "ILS",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "example": "Ergonomic Office Chair",
+            "type": "string"
+          },
+          "sku": {
+            "example": "LAP-1401",
+            "type": "string"
+          },
+          "taxRate": {
+            "example": 0.16,
+            "type": "number"
+          },
+          "unitPrice": {
+            "example": 4299.0,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LoginRequest": {
+        "properties": {
+          "password": {
+            "example": "Admin#2026",
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "username": {
+            "example": "admin",
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object"
+      },
+      "Page": {
+        "description": "A page of results",
+        "properties": {
+          "content": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "type": "array"
+          },
+          "page": {
+            "example": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "size": {
+            "example": 20,
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalElements": {
+            "example": 42,
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "example": 3,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Pageable": {
+        "properties": {
+          "page": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "size": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sort": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RefreshTokenRequest": {
+        "properties": {
+          "refreshToken": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object"
+      },
+      "Settings": {
+        "properties": {
+          "baseCurrencyCode": {
+            "example": "ILS",
+            "type": "string"
+          },
+          "defaultCurrencyCode": {
+            "example": "ILS",
+            "type": "string"
+          },
+          "defaultTaxMode": {
+            "enum": [
+              "EXCLUSIVE",
+              "INCLUSIVE"
+            ],
+            "type": "string"
+          },
+          "defaultTaxRate": {
+            "example": 0.16,
+            "type": "number"
+          },
+          "invoiceNumberPrefix": {
+            "example": "INV",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TokenResponse": {
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresInSeconds": {
+            "example": 1800,
+            "format": "int64",
+            "type": "integer"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateExchangeRateRequest": {
+        "properties": {
+          "rateToBase": {
+            "example": 3.65,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "rateToBase"
+        ],
+        "type": "object"
+      },
+      "UpdateInvoiceRequest": {
+        "properties": {
+          "currencyCode": {
+            "example": "USD",
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "customerId": {
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "exchangeRate": {
+            "example": 3.65,
+            "minimum": 0,
+            "type": "number"
+          },
+          "issueDate": {
+            "example": "2026-09-06",
+            "format": "date",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceLineRequest"
+            },
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array"
+          },
+          "notes": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "taxMode": {
+            "enum": [
+              "EXCLUSIVE",
+              "INCLUSIVE"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "example": 0,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currencyCode",
+          "customerId",
+          "exchangeRate",
+          "issueDate",
+          "lines",
+          "taxMode",
+          "version"
+        ],
+        "type": "object"
+      },
+      "UpdateSettingsRequest": {
+        "properties": {
+          "baseCurrencyCode": {
+            "example": "ILS",
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "defaultCurrencyCode": {
+            "example": "ILS",
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "defaultTaxMode": {
+            "enum": [
+              "EXCLUSIVE",
+              "INCLUSIVE"
+            ],
+            "type": "string"
+          },
+          "defaultTaxRate": {
+            "example": 0.16,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "invoiceNumberPrefix": {
+            "example": "INV",
+            "maxLength": 10,
+            "minLength": 1,
+            "pattern": "[A-Z0-9]+",
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseCurrencyCode",
+          "defaultCurrencyCode",
+          "defaultTaxMode",
+          "defaultTaxRate",
+          "invoiceNumberPrefix"
+        ],
+        "type": "object"
+      },
+      "User": {
+        "properties": {
+          "fullName": {
+            "example": "System Administrator",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "role": {
+            "enum": [
+              "ADMIN",
+              "SALES"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "example": "admin",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "Access token from POST /api/auth/login",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "name": "Abdalrahman Bsharat"
+    },
+    "description": "REST API for the Triosuite ERP sales-invoice assessment.\n\nMulti-currency invoices with user-supplied exchange rates, tax-inclusive\nand tax-exclusive calculation, server-side automatic numbering, an\napproval and cancellation state machine, and barcode lookup.\n\nAuthenticate with `POST /api/auth/login` (try `admin` / `Admin#2026`),\nthen paste the returned `accessToken` into **Authorize**.\n\nErrors are RFC 9457 problem documents carrying a stable `code`\nproperty; see docs/API.md for the full list.",
+    "license": {
+      "name": "MIT"
+    },
+    "title": "Triosuite Invoices API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "description": "Exchanges a username and password for an access token and a refresh token.\n\nRate limited to five failed attempts per minute, counted separately per username\nand per client IP; exceeding either returns 429 with a Retry-After header.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Signed in"
+          },
+          "400": {
+            "description": "Missing username or password"
+          },
+          "401": {
+            "description": "Incorrect username or password"
+          },
+          "429": {
+            "description": "Too many attempts"
+          }
+        },
+        "security": [],
+        "summary": "Sign in",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "description": "Revokes a refresh token. Idempotent: an unknown or already revoked token also\nreturns 204, so the endpoint cannot be used to probe which tokens exist.",
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Token revoked"
+          }
+        },
+        "summary": "Sign out",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "description": "Resolves the caller's access token to an account.",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "The signed-in account"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          }
+        },
+        "summary": "The signed-in account",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "description": "Exchanges a refresh token for a new pair. The presented token is revoked in the\nsame transaction, so each one works exactly once.",
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "New token pair issued"
+          },
+          "401": {
+            "description": "Unknown, revoked or expired refresh token"
+          }
+        },
+        "security": [],
+        "summary": "Rotate tokens",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/currencies": {
+      "get": {
+        "description": "Returns every active currency with its symbol and minor units. The app uses\nminorUnits to round its live totals preview exactly as the server will.",
+        "operationId": "list_2",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Currency"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "List active currencies",
+        "tags": [
+          "Currencies"
+        ]
+      }
+    },
+    "/api/customers": {
+      "get": {
+        "description": "Active customers only, matched case-insensitively on name, e-mail or phone.\nOmit the search term to list them all.",
+        "operationId": "search_1",
+        "parameters": [
+          {
+            "description": "Free-text term matched against name, e-mail and phone",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Search customers",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/api/exchange-rates": {
+      "get": {
+        "description": "Each rate is how many base-currency units one unit of that currency is worth.\nThe Create Invoice screen pre-fills from here, and the user may override the\nvalue per invoice.",
+        "operationId": "list_1",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExchangeRate"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "List exchange rates",
+        "tags": [
+          "Exchange rates"
+        ]
+      }
+    },
+    "/api/exchange-rates/{currencyCode}": {
+      "put": {
+        "description": "Updates the rate suggested for one currency. Invoices already issued are\nunaffected: each keeps the rate it snapshotted when it was saved.",
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "currencyCode",
+            "required": true,
+            "schema": {
+              "pattern": "[A-Za-z]{3}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExchangeRateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeRate"
+                }
+              }
+            },
+            "description": "Rate updated"
+          },
+          "403": {
+            "description": "Caller is not an administrator"
+          },
+          "404": {
+            "description": "Unknown currency"
+          }
+        },
+        "summary": "Set an exchange rate",
+        "tags": [
+          "Exchange rates"
+        ]
+      }
+    },
+    "/api/invoices": {
+      "get": {
+        "description": "Paginated summaries, newest first by default. Cancelled invoices are included and\ncan be isolated with the status filter — nothing is ever hidden from the list.\n\nSortable on issueDate, invoiceNumber, grandTotal and status.",
+        "operationId": "list",
+        "parameters": [
+          {
+            "description": "Only invoices in this status; omit for all three",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "DRAFT",
+                "APPROVED",
+                "CANCELLED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Free-text term matched against the invoice number and the customer name",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "List invoices",
+        "tags": [
+          "Invoices"
+        ]
+      },
+      "post": {
+        "description": "Creates a DRAFT and allocates its number. The client never sends a number: it is\nreserved server-side inside this transaction under a row lock, so concurrent\ncreates receive distinct, sequential numbers.\n\nTotals are computed from the lines and cannot be supplied. Each line's tax rate is\ntaken from its catalogue item.",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            },
+            "description": "Draft created; Location points at it"
+          },
+          "400": {
+            "description": "Invalid body, or an inactive customer, currency or item"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          }
+        },
+        "summary": "Create a draft invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/invoices/{id}": {
+      "get": {
+        "description": "The full document: header, lines, server-computed totals and audit trail.",
+        "operationId": "get_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            },
+            "description": "The invoice"
+          },
+          "404": {
+            "description": "No such invoice"
+          }
+        },
+        "summary": "Read one invoice",
+        "tags": [
+          "Invoices"
+        ]
+      },
+      "put": {
+        "description": "Rewrites the header and every line of a DRAFT. The number and status are not part\nof this contract.\n\nSend back the version last read. A mismatch is 409 STALE_VERSION; an invoice that\nis no longer a draft is 409 INVOICE_NOT_EDITABLE.",
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            },
+            "description": "Draft replaced"
+          },
+          "400": {
+            "description": "Invalid body, or an inactive customer, currency or item"
+          },
+          "404": {
+            "description": "No such invoice"
+          },
+          "409": {
+            "description": "STALE_VERSION or INVOICE_NOT_EDITABLE"
+          }
+        },
+        "summary": "Replace a draft invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/invoices/{id}/approve": {
+      "post": {
+        "description": "DRAFT to APPROVED, stamping who approved it and when. The invoice becomes\nread-only: every later write returns 409 INVOICE_NOT_EDITABLE.\n\nAn invoice with no lines cannot be approved.",
+        "operationId": "approve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveInvoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            },
+            "description": "Approved"
+          },
+          "400": {
+            "description": "The invoice has no lines"
+          },
+          "404": {
+            "description": "No such invoice"
+          },
+          "409": {
+            "description": "STALE_VERSION or INVALID_TRANSITION"
+          }
+        },
+        "summary": "Approve an invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/invoices/{id}/cancel": {
+      "post": {
+        "description": "DRAFT or APPROVED to CANCELLED, stamping who cancelled it, when and optionally\nwhy. The record is kept and stays in the list under the Cancelled filter.\n\nAdministrators only.",
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelInvoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            },
+            "description": "Cancelled"
+          },
+          "403": {
+            "description": "Caller is not an administrator"
+          },
+          "404": {
+            "description": "No such invoice"
+          },
+          "409": {
+            "description": "STALE_VERSION or INVALID_TRANSITION"
+          }
+        },
+        "summary": "Cancel an invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/items": {
+      "get": {
+        "description": "Active items only, matched case-insensitively on name, SKU or barcode.\nOmit the search term to list the whole catalogue.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "description": "Free-text term matched against name, SKU and barcode",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Search items",
+        "tags": [
+          "Items"
+        ]
+      }
+    },
+    "/api/items/by-barcode/{barcode}": {
+      "get": {
+        "description": "Exact match on the scanned code. This is what the scanner sheet calls after each\ndetection; a 404 is expected and simply means the code is not in the catalogue,\nso the app reports it and keeps scanning.",
+        "operationId": "byBarcode",
+        "parameters": [
+          {
+            "description": "The scanned code, e.g. an EAN-13",
+            "example": 7290001000014,
+            "in": "path",
+            "name": "barcode",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "[A-Za-z0-9._-]+",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            },
+            "description": "The item carrying this barcode"
+          },
+          "404": {
+            "description": "No item carries this barcode"
+          }
+        },
+        "summary": "Look an item up by barcode",
+        "tags": [
+          "Items"
+        ]
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "description": "Readable by any signed-in user. The app reads this at start-up to know the base\ncurrency, the defaults for a new invoice and the number prefix.",
+        "operationId": "get",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Read settings",
+        "tags": [
+          "Settings"
+        ]
+      },
+      "put": {
+        "description": "Replaces every setting. Changing the base currency affects invoices created from\nnow on; those already issued keep the base-currency total they were saved with.",
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            },
+            "description": "Settings updated"
+          },
+          "400": {
+            "description": "Unknown or inactive currency"
+          },
+          "403": {
+            "description": "Caller is not an administrator"
+          }
+        },
+        "summary": "Update settings",
+        "tags": [
+          "Settings"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "description": "Generated server url",
+      "url": "http://127.0.0.1:8080"
+    }
+  ],
+  "tags": [
+    {
+      "description": "The catalogue that invoice lines are built from",
+      "name": "Items"
+    },
+    {
+      "description": "Sign in, rotate tokens and sign out",
+      "name": "Authentication"
+    },
+    {
+      "description": "Create, edit, approve and cancel sales invoices",
+      "name": "Invoices"
+    },
+    {
+      "description": "Currencies available for invoicing",
+      "name": "Currencies"
+    },
+    {
+      "description": "Customers available for invoicing",
+      "name": "Customers"
+    },
+    {
+      "description": "Base currency, invoicing defaults and the number prefix",
+      "name": "Settings"
+    },
+    {
+      "description": "Suggested conversion rates to the base currency",
+      "name": "Exchange rates"
+    }
+  ]
+}
