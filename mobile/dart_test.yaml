@@ -1,0 +1,14 @@
+# Test tags.
+#
+# `contract` marks the tests in test/contract/ that talk to a running backend. They skip
+# themselves when nothing answers, so `flutter test` is green on a machine with no backend and
+# genuinely verifies the app-to-API contract on one that has it.
+#
+# CI runs them as their own step, after starting the API:
+#
+#   flutter test test/contract --tags contract
+#
+# They create and cancel a handful of invoices, so point them at a development or test database
+# rather than one whose contents matter.
+tags:
+  contract:
