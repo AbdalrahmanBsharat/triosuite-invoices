@@ -3,6 +3,7 @@ package com.bsharat.triosuite.support;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.bsharat.triosuite.security.LoginRateLimiter;
 import com.jayway.jsonpath.JsonPath;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,10 +48,19 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     private Flyway flyway;
 
+    @Autowired
+    private LoginRateLimiter loginRateLimiter;
+
     @BeforeEach
-    void resetSchema() {
+    void resetState() {
         flyway.clean();
         flyway.migrate();
+
+        // The limiter is a singleton that outlives any one test. Without this reset, a test that
+        // fails a few logins leaves the next one with a reduced allowance, and the suite becomes
+        // order-dependent — which is precisely how the rate-limit tests came to pass locally and
+        // fail in CI.
+        loginRateLimiter.reset();
     }
 
     /** Signs in and returns a value ready for an {@code Authorization} header. */

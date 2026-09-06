@@ -71,6 +71,20 @@ public class LoginRateLimiter {
         windows.remove("user:" + username);
     }
 
+    /**
+     * Forgets every counting window.
+     *
+     * <p>Exists so integration tests can isolate themselves: the limiter is a singleton that lives
+     * as long as the Spring context, so without this, one test's failed logins silently eat into
+     * the next one's allowance and the suite becomes order-dependent.
+     *
+     * <p>Safe to call at runtime — it can only ever forgive attempts, never block them — which is
+     * also what an operator would want when unlocking someone who has locked themselves out.
+     */
+    public void reset() {
+        windows.clear();
+    }
+
     private Optional<Duration> remainingIfBlocked(String key, Instant now) {
         Window current = windows.get(key);
         if (current == null || !current.covers(now) || current.attempts.get() < maxAttempts) {

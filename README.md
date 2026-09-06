@@ -234,12 +234,12 @@ cancelled.
 ## Tests
 
 ```bash
-cd backend && ./mvnw verify        # 48 unit + 81 integration
+cd backend && ./mvnw verify        # 48 unit + 82 integration
 cd mobile  && flutter test         # 52
 cd mobile  && flutter analyze      # clean, no ignore comments
 ```
 
-**181 tests**, all passing.
+**182 tests**, all passing.
 
 | Suite | Count | What it proves |
 |---|---|---|
@@ -254,7 +254,7 @@ cd mobile  && flutter analyze      # clean, no ignore comments
 | `InvoiceCalculationIT` | 8 | Both modes and JOD through the API; client-supplied totals ignored; tax rate taken from the catalogue. |
 | `login_page_test.dart` | 7 | Validation, the show/hide toggle, the error path, and that no registration affordance exists. |
 | `SeededInvoiceTotalsIT` | 3 | Every seeded invoice re-derived with the production calculator; every seeded EAN-13 check digit verified. |
-| `LoginRateLimitIT` | 2 | Five failures then `429` + `Retry-After` — and that a *correct* password is refused too once the allowance is spent. |
+| `LoginRateLimitIT` | 3 | Five failures then `429` + `Retry-After` — and that a *correct* password is refused too once the allowance is spent. |
 | `InvoiceNumberingConcurrencyIT` | 1 | Twelve parallel creates receive distinct, gapless, sequential numbers. |
 
 Integration tests run against a **real MySQL 8**, never H2 — the schema uses CHECK constraints,
@@ -398,7 +398,7 @@ Stated plainly, because a reviewer will find them anyway.
 │   ├── src/main/resources/
 │   │   ├── application.yml   local · test · prod, fully env-driven
 │   │   └── db/migration/     V1__schema.sql · V2__seed.sql  ← the source of truth
-│   ├── src/test/java/…       48 unit + 81 integration tests
+│   ├── src/test/java/…       48 unit + 82 integration tests
 │   ├── scripts/smoke.sh      the reviewer journey against any base URL
 │   └── Dockerfile            multi-stage, JRE-only, non-root
 ├── mobile/                   Flutter app
