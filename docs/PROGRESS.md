@@ -134,6 +134,40 @@ untouched. See [`database/README.md`](../database/README.md).
       on this machine
 - [x] GitHub repository created and pushed: https://github.com/AbdalrahmanBsharat/triosuite-invoices (private — one command in the final report makes it public)
 
+### Phase 8 — Fresh-clone dry run (2026-09-07)
+
+Ran the project the way a reviewer receiving the repository would: the development MySQL instance
+was moved aside to `%LOCALAPPDATA%\triosuite-mysql-parked` to simulate a machine that had never run
+this project, and the repository was cloned from GitHub into a new directory.
+
+- [x] **Gap found.** `scripts/run-local.ps1` only *started* the MySQL instance at
+      `%LOCALAPPDATA%\triosuite-mysql` and failed when there was none, pointing at
+      `database/README.md` — which documented the connection details and how to start the instance,
+      but never how to create one. A reviewer without Docker had no way forward. Fixed in `5d4c03b`:
+      the script now initialises its own data directory, writes `my.ini`, starts the server and
+      creates both databases and the application user on first run, and `-DatabaseOnly` /
+      `-Reinitialize` were added. The README section is no longer titled "on the machine this was
+      built on", because it no longer is.
+- [x] Re-ran from the clone: instance created, API built and started, Flyway applied both migrations
+- [x] `GET /actuator/health` → `{"status":"UP"}`
+- [x] Seed verified through the API: base and default currency `JOD`, five exchange rates, six
+      invoices across all three statuses, 15 catalogue items
+- [x] Write path verified: created `INV-2026-000007`, approved it, confirmed the edit was refused
+      with `409 INVOICE_NOT_EDITABLE`, cancelled it and confirmed the row survived
+- [x] Authorization verified: `sales` → `403 FORBIDDEN` on `PUT /api/settings`, anonymous → `401`
+- [x] Full backend suite re-run against the test database the script had just created
+- [x] Dev database dropped and recreated afterwards, so it holds exactly the seeded data
+- [x] The four `TINYINT(1)` columns became `BOOLEAN`. MySQL 8.4 emits a deprecation warning for an
+      explicit integer display width, so a reviewer's very first boot logged four of them.
+      `BOOLEAN` is a synonym that produces a byte-identical `tinyint(1)` column, verified by
+      regenerating `database/schema_description.md` and diffing it: no change. The warnings are
+      gone and the 131 backend tests still pass.
+
+Two stale statements in the mobile docs were corrected in the same pass: the debug network security
+config is a blanket cleartext permission (needed for a phone on Wi-Fi, whose LAN address cannot be
+enumerated in advance), not a three-address allowlist, and both `mobile/README.md` and the release
+config's own comment still described the old form. Release builds remain HTTPS-only.
+
 ---
 
 ## Audit — §1, the assessment's own requirements

@@ -6,8 +6,8 @@
   build that quietly allowed plain HTTP would let a bearer token travel in the clear on any network
   the phone happens to join.
 
-  The debug variant overrides this file (see src/debug/res/xml/) to allow cleartext to the two
-  addresses a developer machine uses, so `flutter run` against a local backend still works.
+  The debug variant overrides this file (see src/debug/res/xml/) to allow cleartext, so `flutter
+  run` against a backend on a developer machine still works. That variant is never shipped.
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false">

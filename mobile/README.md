@@ -110,7 +110,7 @@ backend. They create and cancel a few invoices, so point them at a development d
 | Application ID | `com.bsharat.triosuite_invoices` |
 | minSdk | 23 — what `mobile_scanner` 7 requires |
 | Release networking | **HTTPS only.** No cleartext exception at all |
-| Debug networking | Cleartext to `10.0.2.2`, `127.0.0.1` and `localhost` only |
+| Debug networking | Cleartext allowed, so a debug build can reach a backend on your own machine |
 | Permissions | `CAMERA` (optional — the picker works without it), `INTERNET` |
 | Launcher icon | Generated: `java tool/GenerateLauncherIcon.java` |
 
