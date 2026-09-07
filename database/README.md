@@ -97,12 +97,26 @@ the machine's existing `MySQL84` service on 3306 untouched.
 | Data directory | `%LOCALAPPDATA%\triosuite-mysql\data` |
 | Config | `%LOCALAPPDATA%\triosuite-mysql\my.ini` |
 
-Start it with:
+**Creating it.** `scripts/run-local.ps1` does this the first time it runs, so normally you never do
+it by hand: it finds the installed MySQL 8 binaries, initialises a data directory of its own, writes
+the `my.ini` above, starts the server, and creates both databases and the application user.
+
+```powershell
+.\scripts\run-local.ps1 -DatabaseOnly     # first run creates it; later runs just start it
+.\scripts\run-local.ps1 -Reinitialize     # throw it away and build a clean one
+```
+
+Nothing about this touches an existing MySQL installation or its data — different port, different
+data directory, different `my.ini`.
+
+**Starting it** later is the same command, or directly:
 
 ```powershell
 & "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" `
     --defaults-file="$env:LOCALAPPDATA\triosuite-mysql\my.ini"
 ```
+
+It is not registered as a Windows service, so it does not come back by itself after a reboot.
 
 These credentials are development-only defaults baked into the `local` and `test` profiles so the
 project runs with no setup. Nothing outside those two profiles has a default: the `prod` profile

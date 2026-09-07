@@ -142,23 +142,33 @@ detail screen shows that. Both implementations use identical formulas and identi
 
 ## Running it locally
 
-### One command, on the machine this was built on
+### One command, on Windows without Docker
+
+Needs a **Java 21 JDK** and **MySQL Community Server 8** installed — nothing else, and no
+configuration.
 
 ```powershell
 .\scripts\run-local.ps1                 # API on 8080
 .\scripts\run-local.ps1 -Port 8081      # or any free port
-.\scripts\run-local.ps1 -SkipBuild      # reuse the existing jar
+.\scripts\run-local.ps1 -SkipBuild      # reuse the jar from last time
+.\scripts\run-local.ps1 -DatabaseOnly   # just the database, e.g. before ./mvnw verify
 ```
 
-It starts the development MySQL if it is not already up, builds, and runs the API in the
-foreground — log on screen, `Ctrl+C` to stop. It refuses to start if the port is taken, and names
-the process holding it.
+The **first** run creates a MySQL instance for this project — its own port (3307), its own data
+directory under `%LOCALAPPDATA%\triosuite-mysql`, its own credentials — then creates the
+`triosuite` and `triosuite_test` databases and the application user. It touches no MySQL already on
+the machine and no data belonging to one. Every later run just starts it again.
 
-> **Nothing here is a Windows service.** The development MySQL on port 3307 and the API are both
-> ordinary processes, so **both stop when the machine restarts** — run the script again. (The
-> separate `MySQL84` service on 3306 is your own installation and is unrelated to this project.)
+Then it builds the API and runs it in the foreground: log on screen, `Ctrl+C` to stop. Flyway
+creates and seeds the schema on the first boot. It refuses to start if the API port is taken, and
+names the process holding it.
+
+Open <http://localhost:8080/swagger-ui.html> and sign in as `admin` / `Admin#2026`.
+
+> **Nothing here is a Windows service.** Both the MySQL on 3307 and the API are ordinary processes,
+> so **both stop when the machine restarts** — run the script again.
 >
-> To make the development MySQL survive a reboot, install it as a service once, from an
+> To make this project's MySQL survive a reboot, install it as a service once, from an
 > **administrator** terminal:
 >
 > ```powershell
@@ -167,7 +177,7 @@ the process holding it.
 > Start-Service TriosuiteMySQL
 > ```
 
-Connection details and how to start MySQL by hand are in
+Connection details, and how to start or rebuild that instance by hand, are in
 [`database/README.md`](database/README.md).
 
 ### Everything at once, with Docker
