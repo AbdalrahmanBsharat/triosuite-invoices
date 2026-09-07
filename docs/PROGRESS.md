@@ -21,7 +21,8 @@ built. Two things could not be executed on this machine and are called out hones
 | Flutter | `flutter --version` | ✅ `3.44.0` stable · Dart `3.12.0` |
 | Flutter doctor | `flutter doctor -v` | ✅ Android SDK 36.1.0, all licences accepted. ❌ Visual Studio absent — irrelevant, no Windows target |
 | adb | `adb version` | ✅ at `%LOCALAPPDATA%\Android\Sdk\platform-tools\` (not on `PATH`) |
-| Android emulator | `emulator -list-avds` | ⚠️ no AVDs, and none can run — see the blocker below |
+| Android emulator | `emulator -list-avds` | ⚠️ no AVDs, and none can run — the app was verified on a physical device instead |
+| Physical device | `adb devices` | ✅ Realme RMX2189 (Android 11), used to verify the app end to end |
 | GitHub CLI | `gh --version` | ✅ `2.96.0`, authenticated as `AbdalrahmanBsharat` |
 | Git | `git --version` | ✅ `2.54.0.windows.1` |
 
@@ -44,7 +45,7 @@ Fixing it needs a BIOS/UEFI change, an elevated `wsl.exe --install --no-distribu
 | Blocked | Consequence | What was done instead |
 |---|---|---|
 | Docker engine | `docker compose up` was never executed here | `Dockerfile` and `docker-compose.yml` are written and committed, and **CI has since built the image, brought the compose stack up healthy and run the smoke test against it — green**. Integration tests use a real local MySQL, which is the fallback the brief specifies (never H2). |
-| Android emulator | The app was never seen rendered | `flutter analyze` clean, 52 tests pass, `flutter build apk --release` produces a **signed** APK, and **15 contract tests drive the app's real repositories and freezed models against a running backend** — covering the serialization, enums, decimals, dates and full invoice lifecycle an emulator run would have exercised. |
+| Android emulator | No AVD can run here | Verified on a **physical device instead** (Realme RMX2189, Android 11) over `adb reverse`: signs in, loads the invoice list, renders ILS, USD, EUR, GBP and JOD correctly — JOD at three decimals. Plus `flutter analyze` clean, 52 tests, a **signed** release APK, and **15 contract tests driving the app's real repositories and freezed models against a running backend**. |
 
 A dedicated MySQL 8.4.9 instance was provisioned on **port 3307** from the already-installed server
 binaries, with its own data directory, leaving the machine's existing `MySQL84` service on 3306

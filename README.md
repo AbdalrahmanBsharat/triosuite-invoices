@@ -173,14 +173,46 @@ credentials in [`database/README.md`](database/README.md), `./mvnw spring-boot:r
 
 ### The app
 
+**On an emulator** — `10.0.2.2` is how it reaches `localhost` on the host:
+
 ```bash
 cd mobile
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080     # emulator
-flutter run --dart-define=API_BASE_URL=http://192.168.1.50:8080 # physical device on your LAN
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
-`10.0.2.2` is how the Android emulator reaches `localhost` on the host machine.
+**On a physical phone over USB** — the most reliable option, because `adb reverse` tunnels through
+the cable and so does not depend on Wi-Fi or on your firewall allowing an inbound connection:
+
+```bash
+adb reverse tcp:8080 tcp:8080
+cd mobile
+flutter run --dart-define=API_BASE_URL=http://localhost:8080
+```
+
+**On a physical phone over Wi-Fi** — use the host's LAN address, and make sure the backend is not
+bound to loopback only:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://192.168.1.50:8080
+```
+
+> **Use a debug build for local testing.** Release builds are HTTPS-only by design — they have no
+> cleartext exception at all — so the APK in `release/` cannot talk to a plain-HTTP backend on your
+> machine, whatever address you give it. `flutter run` builds debug, which permits cleartext.
+
+### Changing the port
+
+Everything is env-driven, so nothing in the repository needs editing:
+
+```bash
+cd backend
+PORT=8081 ./mvnw spring-boot:run       # or: PORT=8081 java -jar target/*.jar
+```
+
+Then point the app at the new port — `adb reverse tcp:8081 tcp:8081` and
+`--dart-define=API_BASE_URL=http://localhost:8081`, or just change it in the running app under
+**Settings → API address**, which needs no rebuild.
 
 ### Building the APK
 
@@ -368,11 +400,12 @@ Stated plainly, because a reviewer will find them anyway.
   disabled in its firmware, so Docker Desktop's WSL2 backend cannot start. `Dockerfile` and
   `docker-compose.yml` are written and reviewed but were verified only by CI, which builds the
   image, brings the stack up and runs the smoke test against it.
-- **The app was never run on a device or emulator.** The same firmware limitation blocks the Android
-  emulator, and no physical device was available. What *is* verified: `flutter analyze` is clean, 52
-  tests pass, `flutter build apk --release` produces a signed APK, and 15 contract tests drive the
-  app's real repositories and models against a running backend — which covers the serialization and
-  lifecycle an emulator run would have exercised. The UI itself has not been seen rendered.
+- **No emulator is possible on this machine** — the same firmware limitation blocks it. The app was
+  instead verified on a physical device (Realme RMX2189, Android 11) over `adb reverse`: it signs
+  in, loads the invoice list, and renders every currency correctly including JOD at three decimals.
+  Beyond that, `flutter analyze` is clean, 52 tests pass, `flutter build apk --release` produces a
+  signed APK, and 15 contract tests drive the app's real repositories and models against a running
+  backend.
 - **Integration tests use a local MySQL rather than Testcontainers**, for the same reason. The
   fallback is the one the brief specifies, and CI uses a MySQL service container through the same
   environment variables.
