@@ -73,14 +73,14 @@ class InvoiceCalculationIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.lines[0].netAmount").value(86.21))
                 .andExpect(jsonPath("$.lines[0].taxAmount").value(13.79))
                 .andExpect(jsonPath("$.grandTotal").value(100.00))
-                // 100.00 USD x 3.65 = 365.00 ILS
-                .andExpect(jsonPath("$.grandTotalBase").value(365.00))
-                .andExpect(jsonPath("$.baseCurrencyCode").value("ILS"));
+                // 100.00 USD x 3.65 = 365.000 JOD, rounded to the base currency's three decimals
+                .andExpect(jsonPath("$.grandTotalBase").value(365.000))
+                .andExpect(jsonPath("$.baseCurrencyCode").value("JOD"));
     }
 
     @Test
-    @DisplayName("a three-decimal currency keeps three decimals and still converts to a two-decimal base")
-    void threeDecimalCurrency() throws Exception {
+    @DisplayName("JOD keeps three decimals, and as the base currency its rate is pinned to 1")
+    void threeDecimalBaseCurrency() throws Exception {
         mockMvc.perform(post("/api/invoices")
                         .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,8 +102,35 @@ class InvoiceCalculationIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.lines[0].taxAmount").value(214.369))
                 .andExpect(jsonPath("$.lines[0].grossAmount").value(1554.175))
                 .andExpect(jsonPath("$.grandTotal").value(1554.175))
-                // 1554.175 x 5.15 = 8004.00125 -> 8004.00 in the two-decimal base currency
-                .andExpect(jsonPath("$.grandTotalBase").value(8004.00));
+                // JOD is the base currency, so the 5.15 the client sent is overridden with 1 and
+                // the base total is the invoice total — reporting an amount in its own currency at
+                // any other rate would be nonsense.
+                .andExpect(jsonPath("$.exchangeRate").value(1.000000))
+                .andExpect(jsonPath("$.grandTotalBase").value(1554.175));
+    }
+
+    @Test
+    @DisplayName("a two-decimal invoice converts into the three-decimal base currency")
+    void twoDecimalInvoiceInThreeDecimalBase() throws Exception {
+        mockMvc.perform(post("/api/invoices")
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "customerId": %d,
+                                  "currencyCode": "ILS",
+                                  "exchangeRate": "0.194175",
+                                  "taxMode": "EXCLUSIVE",
+                                  "issueDate": "2026-09-06",
+                                  "lines": [
+                                    {"itemId": %d, "quantity": "10.000", "unitPrice": "100.0000"}
+                                  ]
+                                }""".formatted(CUSTOMER_ACTIVE, ITEM_ZERO_RATED)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.currencyMinorUnits").value(2))
+                .andExpect(jsonPath("$.grandTotal").value(1000.00))
+                // 1000.00 x 0.194175 = 194.175 exactly, at the base currency's three decimals
+                .andExpect(jsonPath("$.grandTotalBase").value(194.175));
     }
 
     @Test

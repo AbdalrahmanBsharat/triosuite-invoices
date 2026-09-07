@@ -69,7 +69,7 @@ server (source of truth) and in the app (live preview) or the two will disagree 
   3 for JOD). Invoice totals are the sum of the already-rounded line amounts — never a re-rounding of
   an unrounded sum. This keeps `Σ lines == invoice total` exactly, which is what an auditor checks.
 - `exchange_rate` is defined as **how many base-currency units one invoice-currency unit is worth**
-  (invoice in USD, base ILS, rate `3.650000` → 1 USD = 3.65 ILS). `grand_total_base =
+  (invoice in USD, base JOD, rate `0.708738` → 1 USD = 0.708738 JOD). `grand_total_base =
   round(grand_total × exchange_rate)` to the **base** currency's minor units.
 - For an invoice in the base currency the rate is forced to `1.000000` server-side and locked in the UI.
 
@@ -188,7 +188,7 @@ connectivity check is an overlay on the first route, not a route of its own.
 
 ## ADR-0011 — Catalogue prices are converted into the invoice's currency when an item is added
 
-**Context.** The catalogue prices every item in one currency (ILS in the seed), but an invoice may
+**Context.** The catalogue prices every item in one currency (JOD in the seed), but an invoice may
 be issued in any of five. Dropping the raw catalogue figure onto a USD invoice would produce a
 document that is silently wrong by a factor of the exchange rate — and it would be wrong in the
 direction that overcharges the customer.

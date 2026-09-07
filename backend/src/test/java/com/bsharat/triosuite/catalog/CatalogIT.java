@@ -28,9 +28,9 @@ class CatalogIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.sku").value("LAP-1401"))
                 .andExpect(jsonPath("$.name").value("Business Laptop 14\""))
                 .andExpect(jsonPath("$.barcode").value("7290001000014"))
-                .andExpect(jsonPath("$.unitPrice").value(4299.0000))
+                .andExpect(jsonPath("$.unitPrice").value(834.7570))
                 .andExpect(jsonPath("$.taxRate").value(0.1600))
-                .andExpect(jsonPath("$.currencyCode").value("ILS"));
+                .andExpect(jsonPath("$.currencyCode").value("JOD"));
     }
 
     @Test
@@ -153,10 +153,10 @@ class CatalogIT extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/exchange-rates").header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(5))
-                .andExpect(jsonPath("$[?(@.currencyCode == 'ILS')].rateToBase").value(
+                .andExpect(jsonPath("$[?(@.currencyCode == 'JOD')].rateToBase").value(
                         hasItem(1.000000)))
                 .andExpect(jsonPath("$[?(@.currencyCode == 'USD')].rateToBase").value(
-                        hasItem(3.650000)));
+                        hasItem(0.708738)));
     }
 
     // =================================================================================

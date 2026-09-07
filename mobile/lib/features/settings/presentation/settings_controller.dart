@@ -47,6 +47,13 @@ class SettingsController extends GetxController {
   final RxBool saving = false.obs;
   final RxString appVersion = ''.obs;
 
+  /// The address the client is currently pointed at.
+  ///
+  /// Observable rather than a getter over the client: the row that displays it sits in an `Obx`,
+  /// which throws if nothing observable is read inside it, and it has to repaint when the address
+  /// is changed from the sheet.
+  final RxString apiBaseUrl = ''.obs;
+
   final RxString baseCurrencyCode = ''.obs;
   final RxString defaultCurrencyCode = ''.obs;
   final Rx<TaxMode> defaultTaxMode = TaxMode.exclusive.obs;
@@ -68,11 +75,10 @@ class SettingsController extends GetxController {
 
   String get roleLabel => _session.user.value?.role.label ?? '';
 
-  String get apiBaseUrl => _api.baseUrl;
-
   @override
   void onInit() {
     super.onInit();
+    apiBaseUrl.value = _api.baseUrl;
     unawaited(_loadVersion());
     unawaited(refreshAll());
   }
@@ -91,6 +97,7 @@ class SettingsController extends GetxController {
 
   /// Re-reads settings, currencies and rates, then refills the form fields from them.
   Future<void> refreshAll() async {
+    apiBaseUrl.value = _api.baseUrl;
     await _appData.load();
     _applyToForm();
   }

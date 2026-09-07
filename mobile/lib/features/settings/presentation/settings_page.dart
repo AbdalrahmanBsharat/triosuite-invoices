@@ -366,7 +366,7 @@ class _AppSection extends GetView<SettingsController> {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.dns_outlined),
             title: const Text('API address'),
-            subtitle: Text(controller.apiBaseUrl),
+            subtitle: Text(controller.apiBaseUrl.value),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => ApiAddressSheet.show(onChanged: controller.refreshAll),
           ),

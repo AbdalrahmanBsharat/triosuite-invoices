@@ -173,7 +173,7 @@ totals are the sum of the already-rounded lines, never a re-rounding of an unrou
 | `INCLUSIVE` | `gross = round(q·p)`, `net = round(gross / (1 + r))`, `tax = gross − net` |
 
 **Exchange rate** is how many base-currency units one invoice-currency unit is worth: an invoice in
-USD with base ILS carries `3.650000`. It is supplied per invoice, snapshotted at save time and never
+USD with base JOD carries `0.708738`. It is supplied per invoice, snapshotted at save time and never
 re-read, so maintaining a new rate cannot change a document already issued. An invoice in the base
 currency is pinned to exactly `1`. Every invoice reports `grandTotalBase` alongside its own total.
 

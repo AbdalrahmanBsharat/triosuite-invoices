@@ -171,7 +171,7 @@ void main() {
 
       expect(item.sku, 'LAP-1401');
       expect(item.barcode, '7290001000014');
-      expect(item.unitPrice, Decimal.parse('4299'));
+      expect(item.unitPrice, Decimal.parse('834.757'));
       expect(item.taxRate, Decimal.parse('0.16'));
     });
 

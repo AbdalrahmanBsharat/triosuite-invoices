@@ -151,7 +151,7 @@ class InvoiceLifecycleIT extends AbstractIntegrationTest {
                         .content("""
                                 {
                                   "customerId": %d,
-                                  "currencyCode": "ILS",
+                                  "currencyCode": "JOD",
                                   "exchangeRate": "99.000000",
                                   "taxMode": "EXCLUSIVE",
                                   "issueDate": "2026-09-06",
@@ -159,8 +159,8 @@ class InvoiceLifecycleIT extends AbstractIntegrationTest {
                                 }""".formatted(CUSTOMER_ACTIVE, ITEM_LAPTOP)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.exchangeRate").value(1.000000))
-                .andExpect(jsonPath("$.grandTotal").value(116.00))
-                .andExpect(jsonPath("$.grandTotalBase").value(116.00));
+                .andExpect(jsonPath("$.grandTotal").value(116.000))
+                .andExpect(jsonPath("$.grandTotalBase").value(116.000));
     }
 
     // =================================================================================

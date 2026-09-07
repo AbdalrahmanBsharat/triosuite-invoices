@@ -59,8 +59,9 @@ To run the backend yourself, see [Running it locally](#running-it-locally) — i
   quantity goes up.
 - **Watch the tax mode.** Switch Exclusive ↔ Inclusive on an invoice with lines. Exclusive adds tax
   on top; Inclusive extracts it from the price you typed. The total changes accordingly.
-- **Change the currency to JOD.** Every figure switches to three decimals, because that is how the
-  dinar is quoted — and the lines are re-priced at the new rate.
+- **Change the currency.** Invoices start in JOD, the base currency, at three decimals — that is how
+  the dinar is quoted. Switch to USD or EUR and every figure moves to two decimals, the exchange
+  rate unlocks, and the lines are re-priced at it.
 - **Approve an invoice.** It locks. The Edit button disappears, and a lock notice replaces it.
 - **Cancel one** (as `admin`). It stays in the list under the **Cancelled** filter, with its lines,
   totals and approval stamp intact. Nothing is ever deleted.

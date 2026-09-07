@@ -161,8 +161,14 @@ spring:
     username: ${DB_USERNAME:triosuite}
     password: ${DB_PASSWORD:triosuite_dev_pw}
   flyway:
+    # Integration tests drop and rebuild the schema before every test method, which the default
+    # (clean disabled) would refuse.
+    #
+    # There is deliberately no clean-on-validation-error here: Flyway removed that option in 10,
+    # and Spring Boot 4 no longer exposes it, so setting it would be config that silently does
+    # nothing. If an already-applied migration is edited, the fix is to drop the test database
+    # once and let Flyway rebuild it — see database/README.md.
     clean-disabled: false
-    clean-on-validation-error: true
 
 app:
   jwt:
