@@ -142,6 +142,34 @@ detail screen shows that. Both implementations use identical formulas and identi
 
 ## Running it locally
 
+### One command, on the machine this was built on
+
+```powershell
+.\scripts\run-local.ps1                 # API on 8080
+.\scripts\run-local.ps1 -Port 8081      # or any free port
+.\scripts\run-local.ps1 -SkipBuild      # reuse the existing jar
+```
+
+It starts the development MySQL if it is not already up, builds, and runs the API in the
+foreground — log on screen, `Ctrl+C` to stop. It refuses to start if the port is taken, and names
+the process holding it.
+
+> **Nothing here is a Windows service.** The development MySQL on port 3307 and the API are both
+> ordinary processes, so **both stop when the machine restarts** — run the script again. (The
+> separate `MySQL84` service on 3306 is your own installation and is unrelated to this project.)
+>
+> To make the development MySQL survive a reboot, install it as a service once, from an
+> **administrator** terminal:
+>
+> ```powershell
+> & "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" --install TriosuiteMySQL `
+>       --defaults-file="$env:LOCALAPPDATA\triosuite-mysql\my.ini"
+> Start-Service TriosuiteMySQL
+> ```
+
+Connection details and how to start MySQL by hand are in
+[`database/README.md`](database/README.md).
+
 ### Everything at once, with Docker
 
 ```bash
