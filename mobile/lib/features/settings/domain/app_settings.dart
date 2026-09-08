@@ -1,26 +1,37 @@
 import 'package:decimal/decimal.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/money/decimal_json.dart';
 import '../../../core/money/tax_mode.dart';
-import '../../../core/network/json_converters.dart';
-
-part 'app_settings.freezed.dart';
-part 'app_settings.g.dart';
 
 /// Company-wide invoicing defaults, read once at start-up.
 ///
 /// [baseCurrencyCode] is the reporting currency: every invoice also carries its grand total
 /// converted into it, which is what makes a list of invoices in five currencies comparable.
-@freezed
-abstract class AppSettings with _$AppSettings {
-  const factory AppSettings({
-    required String baseCurrencyCode,
-    required String defaultCurrencyCode,
-    required TaxMode defaultTaxMode,
-    @DecimalConverter() required Decimal defaultTaxRate,
-    required String invoiceNumberPrefix,
-    required DateTime updatedAt,
-  }) = _AppSettings;
+class AppSettings {
+  const AppSettings({
+    required this.baseCurrencyCode,
+    required this.defaultCurrencyCode,
+    required this.defaultTaxMode,
+    required this.defaultTaxRate,
+    required this.invoiceNumberPrefix,
+    required this.updatedAt,
+  });
 
-  factory AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
+  final String baseCurrencyCode;
+  final String defaultCurrencyCode;
+  final TaxMode defaultTaxMode;
+  final Decimal defaultTaxRate;
+  final String invoiceNumberPrefix;
+  final DateTime updatedAt;
+
+  factory AppSettings.fromJson(Map<String, dynamic> json) {
+    return AppSettings(
+      baseCurrencyCode: json['baseCurrencyCode'] as String,
+      defaultCurrencyCode: json['defaultCurrencyCode'] as String,
+      defaultTaxMode: TaxMode.fromWire(json['defaultTaxMode'] as String?),
+      defaultTaxRate: decimalFromJson(json['defaultTaxRate']),
+      invoiceNumberPrefix: json['invoiceNumberPrefix'] as String,
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
 }

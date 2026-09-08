@@ -36,13 +36,12 @@ lib/
     └── settings/      {data, domain, presentation}
 ```
 
-`domain/` holds freezed models and enums, `data/` holds repositories over the API client, and
-`presentation/` holds GetX controllers and widgets. Generated `.freezed.dart` and `.g.dart` files
-are committed, and CI fails if they are stale.
+`domain/` holds the models and enums, `data/` holds repositories over the API client, and
+`presentation/` holds GetX controllers and widgets.
 
-```bash
-dart run build_runner build     # after changing anything under domain/
-```
+Models are plain Dart classes with `final` fields and a hand-written `factory X.fromJson`. There is
+no code generation anywhere in this project — nothing to run before building, and every line of the
+model layer is readable as written.
 
 ---
 

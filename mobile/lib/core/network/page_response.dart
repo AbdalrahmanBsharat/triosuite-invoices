@@ -1,8 +1,7 @@
 /// The paginated envelope every list endpoint returns.
 ///
-/// Hand-written rather than generated: a generic `freezed` class needs a `fromJson` that takes a
-/// per-element parser, which the generator cannot infer, so the generated code would be a thin
-/// wrapper around exactly this.
+/// The element type varies per endpoint, so [fromJson] takes the parser for one row rather than
+/// knowing anything about what it is wrapping.
 class PageResponse<T> {
   const PageResponse({
     required this.content,

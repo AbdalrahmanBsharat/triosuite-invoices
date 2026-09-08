@@ -237,7 +237,7 @@ either the plugin declares `compileSdkMinor` or an `android-37` platform package
 **Context.** Money must not pass through a binary float, and `dart:convert` has no arbitrary-
 precision number type: by the time a response is decoded, `10443.2500` is already a Dart `double`.
 
-**Decision.** The API keeps sending amounts as JSON numbers, and `DecimalConverter` builds a
+**Decision.** The API keeps sending amounts as JSON numbers, and `decimalFromJson` builds a
 `Decimal` from the number's **shortest round-tripping decimal representation** rather than from its
 binary value. Dart guarantees `double.toString()` produces a string that parses back to the same
 double, which for a value of at most 15 significant digits is exactly the decimal the server sent.
@@ -287,3 +287,50 @@ facing deployment that no longer exists.
 
 Reverting is two attributes: set both flags back to `false`. `docs/DEPLOYMENT.md` still documents
 the hosted route in full, and step 5 there is the rebuild that would go with it.
+
+---
+
+## ADR-0015 — Models are plain Dart classes, not generated ones
+
+**Context.** The model layer used `freezed` and `json_serializable`. Eight declarations produced
+sixteen generated files and **3,318 lines** of machine-written Dart — a third of the app's total —
+committed to the repository and checked for staleness by CI.
+
+The generated code bought four things: `copyWith`, `==`/`hashCode`, `toString`, and the JSON
+codecs. An audit of what the app actually calls found:
+
+- `copyWith` on a model: **never**. All four call sites in the app are Flutter's own
+  `TextStyle.copyWith`.
+- Value equality: **not relied on**. Every dropdown is a `DropdownButtonFormField<String>`, matching
+  on strings, so no model is ever compared. No test compares whole model objects either.
+
+So roughly 2,600 of those lines implemented behaviour nothing used, and the remaining JSON codecs
+replace a `fromJson` body that is three to twenty lines of obvious field reads.
+
+**Decision.** Models are plain classes: `final` fields, a named constructor, and a hand-written
+`factory X.fromJson(Map<String, dynamic> json)`. `freezed`, `freezed_annotation`,
+`json_annotation`, `json_serializable` and `build_runner` are gone from `pubspec.yaml`, along with
+the CI step that regenerated the output to check it was current.
+
+Two details that the annotations had been hiding are now explicit and better for it:
+
+- The decimal parsing of ADR-0013 is a plain function, `decimalFromJson`, called by name at each
+  money field, instead of a `JsonConverter` attached as an annotation.
+- Enum wire values were `@JsonValue` annotations; each enum now carries a `wireName` and a
+  `fromWire` that falls back to the **safest** member — `UserRole.sales` and
+  `InvoiceStatus.cancelled` — so a value added to the server later cannot make an older build
+  offer a privileged action. The generated code threw on an unknown value instead.
+
+`InvoiceDraft` and `InvoiceLineDraft`, the request bodies, were always hand-written; they are
+unchanged, and the model layer now matches them.
+
+**Consequences.** About 3,400 lines leave the repository and the build has no generation step —
+`flutter pub get` then `flutter run`, with nothing to regenerate after editing a model. Every line
+of the model layer can be read and explained as written, which for a codebase whose purpose is to
+be reviewed is worth more than the generated conveniences it replaces.
+
+The cost is that adding a field now means editing `fromJson` by hand, and forgetting to means the
+field is silently null rather than a compile error. The fifteen contract tests are the guard: they
+drive the real models against a running API and assert on parsed values, so a field that stops
+being read fails the build. If the model count grows well beyond the current eight, this trade
+should be revisited.

@@ -153,18 +153,6 @@ jobs:
         working-directory: mobile
         run: flutter pub get
 
-      - name: Check the generated code is current
-        working-directory: mobile
-        run: |
-          # freezed and json_serializable output is committed, as the brief requires. Regenerating
-          # it here catches a model edited without a rerun, which would otherwise only show up as a
-          # runtime parse failure on someone's phone.
-          dart run build_runner build
-          git diff --exit-code -- lib || {
-            echo "::error::Generated code is stale. Run: cd mobile && dart run build_runner build"
-            exit 1
-          }
-
       - name: Analyze
         working-directory: mobile
         run: flutter analyze --fatal-infos --fatal-warnings

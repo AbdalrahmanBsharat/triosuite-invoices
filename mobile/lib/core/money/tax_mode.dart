@@ -1,15 +1,11 @@
-import 'package:json_annotation/json_annotation.dart';
-
 /// How a line's unit price relates to tax. Chosen per invoice and applied to every line on it.
 ///
-/// The `@JsonValue`s match the server's enum exactly, so nothing has to translate between the two.
+/// The [wireName]s match the server's enum exactly, so nothing has to translate between the two.
 enum TaxMode {
   /// The unit price is net; tax is added on top.
-  @JsonValue('EXCLUSIVE')
   exclusive('EXCLUSIVE', 'Exclusive'),
 
   /// The unit price already contains the tax; the net amount is extracted from it.
-  @JsonValue('INCLUSIVE')
   inclusive('INCLUSIVE', 'Inclusive');
 
   const TaxMode(this.wireName, this.label);
@@ -27,7 +23,7 @@ enum TaxMode {
         TaxMode.inclusive => 'Unit prices already include tax. Net is extracted from them.',
       };
 
-  static TaxMode fromWire(String wireName) => TaxMode.values.firstWhere(
+  static TaxMode fromWire(String? wireName) => TaxMode.values.firstWhere(
         (mode) => mode.wireName == wireName,
         orElse: () => TaxMode.exclusive,
       );

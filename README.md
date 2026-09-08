@@ -141,7 +141,7 @@ detail screen shows that. Both implementations use identical formulas and identi
 |---|---|
 | **Backend** | Java 21 · Spring Boot 4.1.1 · Spring Security 7 · Hibernate 7 · Flyway 12 · springdoc-openapi 3 · jjwt |
 | **Database** | MySQL 8.4 · InnoDB · utf8mb4 |
-| **Mobile** | Flutter 3.44 · Dart 3.12 · GetX · dio · freezed · mobile_scanner · decimal · flutter_secure_storage |
+| **Mobile** | Flutter 3.44 · Dart 3.12 · GetX · dio · mobile_scanner · decimal · intl · flutter_secure_storage |
 | **Build** | Maven wrapper · Gradle (Kotlin DSL) · GitHub Actions · multi-stage Docker |
 
 ---

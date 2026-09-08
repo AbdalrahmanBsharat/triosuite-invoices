@@ -45,7 +45,7 @@ Fixing it needs a BIOS/UEFI change, an elevated `wsl.exe --install --no-distribu
 | Blocked | Consequence | What was done instead |
 |---|---|---|
 | Docker engine | `docker compose up` was never executed here | `Dockerfile` and `docker-compose.yml` are written and committed, and **CI has since built the image, brought the compose stack up healthy and run the smoke test against it — green**. Integration tests use a real local MySQL, which is the fallback the brief specifies (never H2). |
-| Android emulator | No AVD can run here | Verified on a **physical device instead** (Realme RMX2189, Android 11) over `adb reverse`: signs in, loads the invoice list, renders ILS, USD, EUR, GBP and JOD correctly — JOD at three decimals. Plus `flutter analyze` clean, 52 tests, a **signed** release APK, and **15 contract tests driving the app's real repositories and freezed models against a running backend**. |
+| Android emulator | No AVD can run here | Verified on a **physical device instead** (Realme RMX2189, Android 11) over `adb reverse`: signs in, loads the invoice list, renders ILS, USD, EUR, GBP and JOD correctly — JOD at three decimals. Plus `flutter analyze` clean, 52 tests, a **signed** release APK, and **15 contract tests driving the app's real repositories and models against a running backend**. |
 
 A dedicated MySQL 8.4.9 instance was provisioned on **port 3307** from the already-installed server
 binaries, with its own data directory, leaving the machine's existing `MySQL84` service on 3306
@@ -104,7 +104,7 @@ untouched. See [`database/README.md`](../database/README.md).
 - [x] Login · Invoice list · Create/Edit · Details · Settings — **exactly five routes**
 - [x] Barcode scanner, item picker, customer picker, confirmations, cancel-reason — all modals
 - [x] Dio auth interceptor with single-flight refresh
-- [x] freezed / json_serializable models, generated code committed
+- [x] Model layer, repositories and GetX controllers
 - [x] On-device totals preview mirroring the server's formulas and rounding
 - [x] Android manifest, camera permission, network security config, signing config
 - [x] Generated launcher icon at five densities

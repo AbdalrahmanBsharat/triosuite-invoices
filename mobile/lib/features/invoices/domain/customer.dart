@@ -1,19 +1,29 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'customer.freezed.dart';
-part 'customer.g.dart';
-
 /// A party an invoice is billed to.
-@freezed
-abstract class Customer with _$Customer {
-  const factory Customer({
-    required int id,
-    required String name,
-    String? email,
-    String? phone,
-    String? address,
-    @Default(true) bool active,
-  }) = _Customer;
+class Customer {
+  const Customer({
+    required this.id,
+    required this.name,
+    this.email,
+    this.phone,
+    this.address,
+    this.active = true,
+  });
 
-  factory Customer.fromJson(Map<String, dynamic> json) => _$CustomerFromJson(json);
+  final int id;
+  final String name;
+  final String? email;
+  final String? phone;
+  final String? address;
+  final bool active;
+
+  factory Customer.fromJson(Map<String, dynamic> json) {
+    return Customer(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      address: json['address'] as String?,
+      active: json['active'] as bool? ?? true,
+    );
+  }
 }
