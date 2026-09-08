@@ -205,10 +205,10 @@ check is an overlay on the login route, not a sixth screen.
 
 | Required | Delivered |
 |---|---|
-| GitHub repository | [AbdalrahmanBsharat/triosuite-invoices](https://github.com/AbdalrahmanBsharat/triosuite-invoices) — **private**; make it public before submitting |
+| GitHub repository | **[AbdalrahmanBsharat/triosuite-invoices](https://github.com/AbdalrahmanBsharat/triosuite-invoices)** — public |
 | README explaining how to run it | [`README.md`](../README.md) |
 | SQL scripts used to create the database | **[`database/schema.sql`](../database/schema.sql)**, **[`database/seed.sql`](../database/seed.sql)** |
-| Screenshots of the database tables | [`database/screenshots/`](../database/screenshots) — filenames fixed and listed; capture is a manual step |
+| Screenshots of the database tables | **[`database/screenshots/`](../database/screenshots)** — all ten tables plus `flyway_schema_history`, from Workbench's Table Inspector |
 | Source code for the REST APIs | [`backend/`](../backend) |
 | APK | [`release/app-release.apk`](../release/app-release.apk) — signed, verified with `apksigner` |
 | Clear location of the SQL scripts | Stated with paths in the README's [Where everything lives](../README.md#where-everything-lives) table, and again in `database/README.md` |
@@ -281,9 +281,14 @@ correct, for whoever wants the hosted route later.
 
 ---
 
-## Remaining manual steps
+## Phase 10 — Deliverables closed out (2026-09-08)
 
-1. Make the repository public (it was created private):
-   `gh repo edit AbdalrahmanBsharat/triosuite-invoices --visibility public --accept-visibility-change-consequences`
-2. Capture the 13 database screenshots into `database/screenshots/` — the only deliverable with
-   nothing behind it. `database/screenshots/README.md` lists the exact filenames.
+- [x] Repository made public
+- [x] Database screenshots captured and committed — all ten application tables plus
+      `flyway_schema_history`, renamed from their camera-roll filenames to the documented ones
+- [x] `README.md`, `database/README.md` and `database/screenshots/README.md` rewritten to list what
+      is actually there, rather than the thirteen filenames originally planned. The separate schema
+      overview was dropped because every shot already has the Navigator expanded on
+      `triosuite → Tables`; the two row-data shots were not taken
+
+Every deliverable in the assessment is now in the repository. Nothing is outstanding.

@@ -393,12 +393,20 @@ Three conventions run through all of it:
 
 ### Screenshots
 
-In [`database/screenshots/`](database/screenshots):
+In [`database/screenshots/`](database/screenshots) — the structure of all ten tables, plus Flyway's
+migration history, captured in MySQL Workbench's Table Inspector:
 
-`01_schema_overview.png` · `table_users.png` · `table_refresh_tokens.png` · `table_currencies.png` ·
-`table_currency_exchange_rates.png` · `table_customers.png` · `table_items.png` ·
-`table_app_settings.png` · `table_invoice_sequences.png` · `table_invoices.png` ·
-`table_invoice_lines.png` · `data_invoices.png` · `data_invoice_lines.png`
+[`table_users.png`](database/screenshots/table_users.png) ·
+[`table_refresh_tokens.png`](database/screenshots/table_refresh_tokens.png) ·
+[`table_currencies.png`](database/screenshots/table_currencies.png) ·
+[`table_currency_exchange_rates.png`](database/screenshots/table_currency_exchange_rates.png) ·
+[`table_customers.png`](database/screenshots/table_customers.png) ·
+[`table_items.png`](database/screenshots/table_items.png) ·
+[`table_app_settings.png`](database/screenshots/table_app_settings.png) ·
+[`table_invoice_sequences.png`](database/screenshots/table_invoice_sequences.png) ·
+[`table_invoices.png`](database/screenshots/table_invoices.png) ·
+[`table_invoice_lines.png`](database/screenshots/table_invoice_lines.png) ·
+[`table_flyway_schema_history.png`](database/screenshots/table_flyway_schema_history.png)
 
 ---
 

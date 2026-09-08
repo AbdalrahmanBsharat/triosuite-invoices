@@ -130,27 +130,21 @@ default schema `triosuite`.
 
 ## Screenshots
 
-The assessment asks for screenshots of the database tables. They belong in
-[`screenshots/`](screenshots) under these exact names, which the root `README.md` links to:
+The assessment asks for screenshots of the database tables. They are in
+[`screenshots/`](screenshots) — one per table, showing its structure in MySQL Workbench's **Table
+Inspector → Columns**:
 
-| File | What to capture |
-|---|---|
-| `01_schema_overview.png` | The schema tree expanded, showing all 10 tables |
-| `table_users.png` | Structure of `users` |
-| `table_refresh_tokens.png` | Structure of `refresh_tokens` |
-| `table_currencies.png` | Structure of `currencies` |
-| `table_currency_exchange_rates.png` | Structure of `currency_exchange_rates` |
-| `table_customers.png` | Structure of `customers` |
-| `table_items.png` | Structure of `items` |
-| `table_app_settings.png` | Structure of `app_settings` |
-| `table_invoice_sequences.png` | Structure of `invoice_sequences` |
-| `table_invoices.png` | Structure of `invoices` |
-| `table_invoice_lines.png` | Structure of `invoice_lines` |
-| `data_invoices.png` | Rows of `invoices` — all three statuses visible |
-| `data_invoice_lines.png` | Rows of `invoice_lines` |
+`table_users.png` · `table_refresh_tokens.png` · `table_currencies.png` ·
+`table_currency_exchange_rates.png` · `table_customers.png` · `table_items.png` ·
+`table_app_settings.png` · `table_invoice_sequences.png` · `table_invoices.png` ·
+`table_invoice_lines.png` · `table_flyway_schema_history.png`
 
-In MySQL Workbench: right-click a table → **Table Inspector** → *Columns* for the structure shots,
-and → **Select Rows** for the two data shots.
+All ten application tables, plus the migration history table Flyway creates. Each shot also has the
+Navigator expanded on `triosuite → Tables`, so the full schema is visible in every one.
+
+For the same detail as text — every column, type, key and constraint — see
+[`schema_description.md`](schema_description.md). [`screenshots/README.md`](screenshots/README.md)
+explains how to retake them.
 
 ---
 

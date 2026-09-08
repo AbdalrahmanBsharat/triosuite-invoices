@@ -1,46 +1,40 @@
 # Database screenshots
 
-The assessment asks for screenshots of the database tables. They belong in this directory, under
-these exact filenames — the root `README.md` already lists them.
+The assessment asks for screenshots of the database tables. Here they are — the structure of every
+table in the schema, captured in MySQL Workbench's **Table Inspector → Columns**.
 
-| File | What to capture |
+| File | Table |
 |---|---|
-| `01_schema_overview.png` | The schema tree expanded, showing all 10 tables |
-| `table_users.png` | Structure of `users` |
-| `table_refresh_tokens.png` | Structure of `refresh_tokens` |
-| `table_currencies.png` | Structure of `currencies` |
-| `table_currency_exchange_rates.png` | Structure of `currency_exchange_rates` |
-| `table_customers.png` | Structure of `customers` |
-| `table_items.png` | Structure of `items` |
-| `table_app_settings.png` | Structure of `app_settings` |
-| `table_invoice_sequences.png` | Structure of `invoice_sequences` |
-| `table_invoices.png` | Structure of `invoices` |
-| `table_invoice_lines.png` | Structure of `invoice_lines` |
-| `data_invoices.png` | Rows of `invoices` — all three statuses visible |
-| `data_invoice_lines.png` | Rows of `invoice_lines` |
+| [`table_users.png`](table_users.png) | `users` |
+| [`table_refresh_tokens.png`](table_refresh_tokens.png) | `refresh_tokens` |
+| [`table_currencies.png`](table_currencies.png) | `currencies` |
+| [`table_currency_exchange_rates.png`](table_currency_exchange_rates.png) | `currency_exchange_rates` |
+| [`table_customers.png`](table_customers.png) | `customers` |
+| [`table_items.png`](table_items.png) | `items` |
+| [`table_app_settings.png`](table_app_settings.png) | `app_settings` |
+| [`table_invoice_sequences.png`](table_invoice_sequences.png) | `invoice_sequences` |
+| [`table_invoices.png`](table_invoices.png) | `invoices` |
+| [`table_invoice_lines.png`](table_invoice_lines.png) | `invoice_lines` |
+| [`table_flyway_schema_history.png`](table_flyway_schema_history.png) | `flyway_schema_history` — Flyway's own bookkeeping, showing both migrations applied |
 
-## Taking them
+That is all ten application tables, plus the migration history table Flyway creates.
 
-**Connect MySQL Workbench** to the database. For the local development instance documented in
-[`../README.md`](../README.md): hostname `127.0.0.1`, port `3307`, username `triosuite`, password
-`triosuite_dev_pw`, default schema `triosuite`.
+Every shot also has the Navigator open on the left with `triosuite → Tables` expanded, so the whole
+schema is visible in each one — which is why there is no separate overview image.
 
-Then, in the Navigator:
+The same information in text form, and easier to search, is in
+[`../schema_description.md`](../schema_description.md): `DESCRIBE` and `SHOW CREATE TABLE` output
+for every table, regenerated from the committed scripts by
+[`../../scripts/dump-schema-description.sh`](../../scripts/dump-schema-description.sh).
 
-- **`01_schema_overview.png`** — expand `triosuite → Tables` so all ten are listed, and capture the
-  panel.
-- **`table_<name>.png`** — right-click the table → **Table Inspector** → the **Columns** tab.
-- **`data_invoices.png` / `data_invoice_lines.png`** — right-click the table → **Select Rows**.
+## Retaking them
 
-For the two data shots, widen the result grid enough that the interesting columns are legible:
-`invoice_number`, `currency_code`, `tax_mode`, `status` and the four totals for `invoices`;
-`item_name_snapshot`, `quantity`, `unit_price`, `tax_rate` and the three amounts for
-`invoice_lines`.
+Connect MySQL Workbench to the development instance — hostname `127.0.0.1`, port `3307`, username
+`triosuite`, password `triosuite_dev_pw`, default schema `triosuite` (see
+[`../README.md`](../README.md)). Then right-click a table → **Table Inspector** → the **Columns**
+tab.
 
-## If the database is empty
-
-The screenshots should show the seeded demo data — six invoices across all three statuses, fifteen
-items, five currencies. Either start the backend once (Flyway seeds it automatically) or apply the
+If the database is empty, start the backend once and Flyway creates and seeds it, or apply the
 scripts by hand:
 
 ```bash
