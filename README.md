@@ -447,38 +447,6 @@ The ones that shaped the most code:
   is told to reload rather than given an explanation of a state they have not seen.
 - **Integration tests use a real MySQL, never H2**, because the DDL is MySQL-specific.
 
----
-
-## Known limitations
-
-Stated plainly, because a reviewer will find them anyway.
-
-- **The Docker artifacts were never run on the development machine.** Hardware virtualization is
-  disabled in its firmware, so Docker Desktop's WSL2 backend cannot start. `Dockerfile` and
-  `docker-compose.yml` are written and reviewed but were verified only by CI, which builds the
-  image, brings the stack up and runs the smoke test against it.
-- **No emulator is possible on this machine** — the same firmware limitation blocks it. The app was
-  instead verified on a physical device (Realme RMX2189, Android 11) over `adb reverse`: it signs
-  in, loads the invoice list, and renders every currency correctly including JOD at three decimals.
-  Beyond that, `flutter analyze` is clean, 52 tests pass, `flutter build apk --release` produces a
-  signed APK, and 15 contract tests drive the app's real repositories and models against a running
-  backend.
-- **Integration tests use a local MySQL rather than Testcontainers**, for the same reason. The
-  fallback is the one the brief specifies, and CI uses a MySQL service container through the same
-  environment variables.
-- **The login rate limiter is in-memory.** Correct for the single instance this deploys as; it
-  resets on restart and is not shared between replicas. Horizontal scaling would want Redis.
-- **The APK is 68 MB.** It is a universal build — three ABIs plus ML Kit's bundled barcode model —
-  so it installs anywhere without the reviewer choosing a variant. `--split-per-abi` produces builds
-  about a third the size if that matters more than convenience.
-- **Demo credentials are in a public repository.** Fine for a review; change them before anything
-  else — [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#before-anyone-else-uses-this) has the procedure.
-- **No refresh-token cleanup job.** Expired rows are pruned opportunistically on login, which is
-  enough at this scale but is not a substitute for a scheduled sweep.
-- **English only.** `intl` formats dates and numbers to the device's locale, but the strings are not
-  externalised.
-
----
 
 ## Repository layout
 
