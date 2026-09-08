@@ -199,8 +199,7 @@ Flyway creates and seeds the schema on first start; a second start is a no-op.
 
 > The Docker artifacts were **not** run on the machine this was built on — hardware virtualization
 > is disabled in its firmware, so Docker Desktop's backend cannot start. They are exercised by CI
-> instead, which builds the image, brings the stack up and runs the smoke test against it. See
-> [Known limitations](#known-limitations).
+> instead, which builds the image, brings the stack up and runs the smoke test against it.
 
 ### Backend against your own MySQL
 
