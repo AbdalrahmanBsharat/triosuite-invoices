@@ -106,7 +106,7 @@ untouched. See [`database/README.md`](../database/README.md).
 - [x] Dio auth interceptor with single-flight refresh
 - [x] freezed / json_serializable models, generated code committed
 - [x] On-device totals preview mirroring the server's formulas and rounding
-- [x] Android manifest, camera permission, HTTPS-only release + debug-only cleartext, signing config
+- [x] Android manifest, camera permission, network security config, signing config
 - [x] Generated launcher icon at five densities
 - [x] **Exit:** `flutter analyze` clean, no `// ignore` · `flutter test` green · `flutter build apk --release` succeeds
 
@@ -166,7 +166,8 @@ this project, and the repository was cloned from GitHub into a new directory.
 Two stale statements in the mobile docs were corrected in the same pass: the debug network security
 config is a blanket cleartext permission (needed for a phone on Wi-Fi, whose LAN address cannot be
 enumerated in advance), not a three-address allowlist, and both `mobile/README.md` and the release
-config's own comment still described the old form. Release builds remain HTTPS-only.
+config's own comment still described the old form. (Release builds were HTTPS-only at that point;
+ADR-0014 later reversed that, once the hosted backend was dropped.)
 
 ---
 
@@ -261,12 +262,28 @@ mobile   flutter test       30 calculator + 15 contract + 7 widget = 52
 
 ---
 
+## Phase 9 — Local-only delivery (2026-09-08)
+
+Hosting was dropped. Every reviewer runs the API themselves and points the app at it, so there is no
+deployment to keep alive and nothing to pay for. `docs/DEPLOYMENT.md` is kept, unchanged and still
+correct, for whoever wants the hosted route later.
+
+- [x] **Gap found.** The committed release APK could not reach *any* local backend. Verified with
+      `aapt2 dump xmltree release/app-release.apk`: `cleartextTrafficPermitted=false`, no
+      `<domain-config>`. HTTPS-only was right while a hosted API was planned; with none, the APK
+      deliverable was unusable — an emulator, a USB tunnel and a LAN address are all plain HTTP.
+- [x] Release build now permits cleartext, manifest and network security config kept in step for
+      API 23 — reasoning and the revert in [ADR-0014](DECISIONS.md)
+- [x] Trust anchors in release stay `system` only; the debug variant keeps its user-CA trust
+- [x] APK rebuilt, still signed with the release keystore, and re-verified with `aapt2`
+- [x] README reviewer quick start rewritten around the three local setups, with the address for each
+- [x] Stale HTTPS-only claims removed from `README.md`, `mobile/README.md` and this file
+
+---
+
 ## Remaining manual steps
 
-Everything that cannot be done from this session, in order, is listed in the final report:
-
-1. Make the repository public (it was created private)
-2. Capture the 13 database screenshots
-3. Deploy (Option A in [`docs/DEPLOYMENT.md`](DEPLOYMENT.md))
-4. Rebuild the APK with the public URL and commit it
-5. Attach the APK to a GitHub Release
+1. Make the repository public (it was created private):
+   `gh repo edit AbdalrahmanBsharat/triosuite-invoices --visibility public --accept-visibility-change-consequences`
+2. Capture the 13 database screenshots into `database/screenshots/` — the only deliverable with
+   nothing behind it. `database/screenshots/README.md` lists the exact filenames.

@@ -250,3 +250,40 @@ friendly for anyone poking at it with `curl` and `jq` — the smoke script adds 
 to check that net + tax equals gross, which strings would make impossible. The stricter alternative,
 serialising `BigDecimal` as a JSON string, is the right move if amounts ever exceed 15 significant
 digits; it is noted here so the reason for not doing it now is on the record rather than assumed.
+
+---
+
+## ADR-0014 — The release build permits cleartext HTTP, because there is no hosted backend
+
+**Context.** Earlier builds were HTTPS-only: `usesCleartextTraffic="false"` and a network security
+config with no cleartext exception. That was correct while the plan was to deploy the API behind
+TLS, with the app talking to one known origin.
+
+The plan changed. There is no hosted backend: every reviewer runs the API on their own machine and
+points the app at it — an emulator at `10.0.2.2`, a USB tunnel at `localhost`, or a phone on the
+same Wi-Fi using the PC's LAN address. With an HTTPS-only build none of those work, and the APK
+that is a required deliverable cannot reach a server at all. That was verified against the shipped
+APK, not assumed: `aapt2 dump xmltree` on `release/app-release.apk` showed
+`cleartextTrafficPermitted=false` with no `<domain-config>`.
+
+The tighter fix does not exist. A network security config matches **domain names, not address
+ranges**, so `10.0.2.2` and `localhost` can be allowed individually but "any private address on
+whatever network this phone joins" cannot be expressed. The LAN case is the main one, so the
+permission has to be broad enough to cover it.
+
+**Decision.** `cleartextTrafficPermitted="true"` in the release network security config, and
+`android:usesCleartextTraffic="true"` in the manifest. The manifest attribute is ignored from API 24
+up, but this app supports API 23, which predates the config format — the two are kept in step so
+behaviour is the same across every supported version. Trust anchors in release stay `system` only:
+the debug variant additionally trusts user-installed CAs for proxy inspection, and that difference
+is preserved.
+
+**Consequences.** The single committed APK works for all three local setups with no rebuild, which
+is what makes "download the APK, run the backend, type an address" a real path. The cost is that a
+bearer token would travel in the clear if the app were ever pointed at a remote plain-HTTP server —
+acceptable here, where the server is on the reviewer's own machine or LAN and holds demo data. This
+is a deliberate reversal of the original HTTPS-only rule, which existed to protect an internet-
+facing deployment that no longer exists.
+
+Reverting is two attributes: set both flags back to `false`. `docs/DEPLOYMENT.md` still documents
+the hosted route in full, and step 5 there is the rebuild that would go with it.

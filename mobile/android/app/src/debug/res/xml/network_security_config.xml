@@ -2,27 +2,15 @@
 <!--
   Debug builds only. Overrides the release configuration of the same name.
 
-  Release builds are HTTPS-only and have no cleartext exception at all — see
-  src/main/res/xml/network_security_config.xml. This file exists so that a developer can point a
-  debug build at a backend running on their own machine, which is necessarily plain HTTP:
-
-    - the Android emulator reaches the host at 10.0.2.2
-    - `adb reverse tcp:8080 tcp:8080` makes the host reachable at localhost from a USB-connected
-      phone, which is the most reliable option because it does not depend on Wi-Fi or on the host
-      firewall allowing an inbound connection
-    - a physical phone on the same Wi-Fi reaches the host at its LAN address, which varies per
-      network and cannot be enumerated here — Android's network security config matches domains,
-      not address ranges, so there is no way to express "any private address"
-
-  That last case is why this is a blanket permission rather than a list. It applies only to the
-  debug variant, which is never shipped: the APK in release/ is built from the main configuration
-  and refuses cleartext to anything, including localhost.
+  Cleartext is permitted in both variants (see src/main/res/xml/network_security_config.xml for
+  why), so the one thing this file adds is trust in user-installed certificate authorities. That
+  lets a developer put a proxy such as Charles or mitmproxy in front of the app and read its
+  traffic, which the release build deliberately does not allow.
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
-            <!-- Lets a developer inspect traffic with a locally installed proxy certificate. -->
             <certificates src="user" />
         </trust-anchors>
     </base-config>

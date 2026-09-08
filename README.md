@@ -42,15 +42,21 @@ from this source.
 Sign in as both. The difference is visible: the Cancel button simply is not there for `sales`, and
 the Settings screen becomes read-only.
 
-**3. Point it at a backend.** The committed APK is built for the Android emulator against a local
-backend (`http://10.0.2.2:8080`). On a physical phone, or against a deployment, set the address once
-in the app:
+**3. Start the backend and point the app at it.** There is no hosted server — you run it, with
+[one command](#one-command-on-windows-without-docker). Then tell the app where it is:
 
 > **Settings → API address** → type the base URL → **Test connection** → **Save**
 >
-> The same button appears on the "cannot reach the server" screen, which is where you would want it.
+> The same button is on the "cannot reach the server" screen, which is where you first need it.
 
-To run the backend yourself, see [Running it locally](#running-it-locally) — it is one command.
+| Where the app runs | Address to enter |
+|---|---|
+| Android emulator on the same machine | `http://10.0.2.2:8080` |
+| Phone on USB, after `adb reverse tcp:8080 tcp:8080` | `http://localhost:8080` |
+| Phone on the same Wi-Fi | `http://<your PC's IP>:8080`, e.g. `http://192.168.1.50:8080` |
+
+Find your PC's address with `ipconfig` on Windows or `ip addr` on Linux/macOS. The phone needs to be
+on the same network as the PC — it does not need internet access.
 
 **4. Things worth trying.**
 
@@ -236,9 +242,9 @@ bound to loopback only:
 flutter run --dart-define=API_BASE_URL=http://192.168.1.50:8080
 ```
 
-> **Use a debug build for local testing.** Release builds are HTTPS-only by design — they have no
-> cleartext exception at all — so the APK in `release/` cannot talk to a plain-HTTP backend on your
-> machine, whatever address you give it. `flutter run` builds debug, which permits cleartext.
+> **The APK in `release/` works for all three.** It permits cleartext HTTP, because the backend it
+> talks to is one you run yourself and there is no HTTPS endpoint to point it at. Install it and set
+> the address under **Settings → API address** — no rebuild, no `flutter run`.
 
 ### Changing the port
 
@@ -398,7 +404,11 @@ In [`database/screenshots/`](database/screenshots):
 
 ## Deployment
 
-**[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)** — two zero-cost routes, with exact commands, the
+This project is delivered to run **locally** — you start the API, the app talks to it over your own
+network. Nothing is hosted, so there is nothing to pay for, keep awake, or let expire.
+
+Hosting it is still a supported option, and fully written up if you want it:
+**[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)** — two zero-cost routes with exact commands, the
 expected output at each step, and a troubleshooting table. Free-tier terms were verified in
 September 2026 and each claim links to its source.
 

@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Release builds: HTTPS only.
+  Cleartext HTTP is permitted, on purpose.
 
-  There is no cleartext exception here at all. The app talks to one API over TLS, and a release
-  build that quietly allowed plain HTTP would let a bearer token travel in the clear on any network
-  the phone happens to join.
+  This app talks to a backend that the person reviewing it runs on their own machine — on an
+  emulator (10.0.2.2), over a USB tunnel (localhost via `adb reverse`), or across a local network
+  at whatever address that machine happens to have. There is no hosted endpoint, so there is no
+  HTTPS to insist on.
 
-  The debug variant overrides this file (see src/debug/res/xml/) to allow cleartext, so `flutter
-  run` against a backend on a developer machine still works. That variant is never shipped.
+  The obvious tighter version — permit cleartext only for the local addresses — is not expressible.
+  Android's network security config matches domain names, not address ranges, so 10.0.2.2 and
+  localhost can be listed but "any private address on this network" cannot. A reviewer typing their
+  PC's LAN address into Settings is the main way this app is used, so the permission has to be broad
+  enough to cover it.
+
+  What this is not: user-installed certificate authorities are still not trusted here (only
+  src="system"), so this build cannot be transparently intercepted by a proxy the way the debug
+  variant can.
+
+  If this app is ever pointed at a hosted backend, this file is the one line to change:
+  set cleartextTrafficPermitted="false" and set android:usesCleartextTraffic="false" in
+  AndroidManifest.xml, and the build becomes HTTPS-only again. See docs/DEPLOYMENT.md.
 -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="false">
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>
